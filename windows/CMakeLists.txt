@@ -32,7 +32,8 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 # webview_windows 仍用 <experimental/coroutine>；新 MSVC 默认当 error，先压制。
-add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNING)
+# 注意宏名是复数 WARNINGS
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
 
 # Compilation settings that should be applied to most targets.
 #

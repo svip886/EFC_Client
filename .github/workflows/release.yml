@@ -127,7 +127,29 @@ jobs:
           grep -E '^version:' pubspec.yaml
       - run: flutter config --enable-windows-desktop
       - run: flutter pub get
+      # 新 MSVC 对 experimental/coroutine 直接 error；webview_windows 0.4 仍依赖它
+      - name: Silence experimental coroutine deprecation for plugins
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $cmake = 'windows/flutter/generated_plugins.cmake'
+          $marker = '_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS'
+          $content = Get-Content $cmake -Raw
+          if ($content -notmatch [regex]::Escape($marker)) {
+            $append = @"
+
+# Auto-added for webview_windows + new MSVC
+foreach(plugin `${FLUTTER_PLUGIN_LIST})
+  target_compile_definitions(`${plugin}_plugin PRIVATE $marker)
+endforeach()
+"@
+            Add-Content -Path $cmake -Value $append -Encoding utf8
+          }
+          Get-Content $cmake
       - run: flutter build windows --release
+        env:
+          # 额外兜底：传给 cl.exe
+          CL: /D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
       - name: Zip bundle
         shell: pwsh
         run: |
