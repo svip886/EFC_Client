@@ -1,0 +1,8 @@
+{
+  "latestVersion": "1.0.0",
+  "latestBuild": 1,
+  "minBuild": 1,
+  "force": false,
+  "notes": "示例清单：部署到 https://ecfc.fans/app/version.json 后，App「检查新版本」即可读取。",
+  "downloadUrl": "https://ecfc.fans/"
+}

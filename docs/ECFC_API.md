@@ -40,7 +40,8 @@
 - 发帖 `/posts/new`
 - 帖子详情 `/posts/{postId}`
 - 搜索 `/search`
-- 设置 `/settings`
+- 设置 `/settings`（网站内设置）
+- App 版本清单（客户端自用，公开）：`GET /app/version.json`（样本 `api-samples/app_version.json`；站点需自行部署）
 
 ### 2.2 主题
 

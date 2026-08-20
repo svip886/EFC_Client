@@ -41,6 +41,14 @@ void main() {
       expect(AppConstants.isAppAction(u!), isTrue);
     });
 
+    test('ecfc app settings action', () {
+      final u = AppConstants.normalizeLaunchUri(
+        Uri.parse('ecfc://action/settings'),
+      );
+      expect(u?.path, AppConstants.appActionSettings);
+      expect(AppConstants.isAppAction(u!), isTrue);
+    });
+
     test('foreign host rejected', () {
       final u = AppConstants.normalizeLaunchUri(
         Uri.parse('https://evil.example/x'),

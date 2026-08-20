@@ -28,6 +28,12 @@ class AppConstants {
   /// 例：`/__app/checkin` = 一键挂号 API。
   static const String appActionPrefix = '/__app';
   static const String appActionCheckin = '/__app/checkin';
+  static const String appActionSettings = '/__app/settings';
+
+  /// App 版本清单（公开 JSON，与 Web 登录无关）。
+  /// 部署示例见 `docs/api-samples/app_version.json`。
+  static const String appVersionManifestUrl =
+      'https://ecfc.fans/app/version.json';
 
   /// 允许在 WebView 内打开的主机（含子域）。
   static bool isAllowedHost(String? host) {
@@ -51,6 +57,7 @@ class AppConstants {
   /// - `https://ecfc.fans/...`、`http://ecfc.fans/...`
   /// - `ecfc://forum` → `https://ecfc.fans/forum`
   /// - `ecfc:///checkin` → `https://ecfc.fans/checkin`
+  /// - `ecfc://action/settings` → `/__app/settings`（原生 App 设置）
   static Uri? normalizeLaunchUri(Uri? uri) {
     if (uri == null) return null;
 
@@ -76,11 +83,16 @@ class AppConstants {
       var path = buf.toString();
       if (path.isEmpty || path == '/') path = homePath;
 
-      // 别名：一键挂号
+      // 别名：一键挂号 / App 设置
       if (path == '/action/checkin' ||
           path == '/checkin/do' ||
           path == '/checkin/quick') {
         path = appActionCheckin;
+      }
+      if (path == '/action/settings' ||
+          path == '/app/settings' ||
+          path == '/settings/app') {
+        path = appActionSettings;
       }
 
       return Uri(
