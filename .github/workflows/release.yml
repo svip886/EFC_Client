@@ -1,0 +1,141 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g. v1.0.1). Empty = use pubspec version as vX.Y.Z'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          PUBSPEC_LINE=$(grep -E '^version:' pubspec.yaml | head -n1 | awk '{print $2}')
+          PUB_NAME="${PUBSPEC_LINE%%+*}"
+          PUB_BUILD="${PUBSPEC_LINE##*+}"
+          if [[ "$PUB_BUILD" == "$PUBSPEC_LINE" ]]; then PUB_BUILD="1"; fi
+
+          TAG="${{ github.event.inputs.tag }}"
+          if [[ -z "${TAG}" && "${{ github.ref_type }}" == "tag" ]]; then
+            TAG="${{ github.ref_name }}"
+          fi
+          if [[ -z "${TAG}" ]]; then
+            TAG="v${PUB_NAME}"
+          fi
+
+          # Display version: prefer pubspec name; allow tag v1.2.3 to override name
+          NAME="$PUB_NAME"
+          BUILD="$PUB_BUILD"
+          TRAW="${TAG#v}"
+          if [[ "$TRAW" == *"+"* ]]; then
+            NAME="${TRAW%%+*}"
+            BUILD="${TRAW##*+}"
+          elif [[ -n "$TRAW" ]]; then
+            NAME="$TRAW"
+          fi
+
+          FULL="${NAME}+${BUILD}"
+          {
+            echo "tag=${TAG}"
+            echo "version=${NAME}"
+            echo "build=${BUILD}"
+            echo "full=${FULL}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Resolved tag=${TAG} full=${FULL}"
+
+      - name: Sync pubspec version
+        shell: bash
+        run: |
+          set -euo pipefail
+          FULL="${{ steps.ver.outputs.full }}"
+          sed -i -E "s/^version: .*/version: ${FULL}/" pubspec.yaml
+          grep -E '^version:' pubspec.yaml
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
+
+      - name: Build APK (release)
+        run: flutter build apk --release
+
+      - name: Prepare artifacts
+        id: art
+        shell: bash
+        run: |
+          set -euo pipefail
+          VER="${{ steps.ver.outputs.version }}"
+          BUILD="${{ steps.ver.outputs.build }}"
+          TAG="${{ steps.ver.outputs.tag }}"
+          REPO="${{ github.repository }}"
+          mkdir -p dist
+          SRC="build/app/outputs/flutter-apk/app-release.apk"
+          APK_NAME="ecfc-${VER}+${BUILD}-release.apk"
+          cp "$SRC" "dist/${APK_NAME}"
+          cp "$SRC" "dist/ecfc-release.apk"
+          DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${APK_NAME}"
+          python3 - <<PY
+          import json
+          from pathlib import Path
+          data = {
+            "latestVersion": "${VER}",
+            "latestBuild": int("${BUILD}"),
+            "minBuild": 1,
+            "force": False,
+            "notes": "GitHub Release ${TAG}",
+            "downloadUrl": "${DOWNLOAD_URL}",
+          }
+          text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+          Path("dist/version.json").write_text(text, encoding="utf-8")
+          Path("app/version.json").write_text(text, encoding="utf-8")
+          print(text)
+          PY
+          echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
+          ls -la dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: ${{ steps.ver.outputs.tag }}
+          generate_release_notes: true
+          files: |
+            dist/${{ steps.art.outputs.apk_name }}
+            dist/ecfc-release.apk
+            dist/version.json
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

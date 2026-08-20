@@ -19,6 +19,33 @@ class AppConstants {
 
   static const String appName = '私家E院';
 
+  /// 客户端版权（非站点版权）。
+  static const String appCopyright = 'Paranoid';
+  static const String appCopyrightLine = '© Paranoid';
+
+  /// GitHub 发布仓库（检查更新 / Release 下载）。
+  /// 若 fork 或改名，只改这两处即可。
+  static const String githubOwner = 'Paranoid';
+  static const String githubRepo = 'ecfc';
+
+  static String get githubRepoUrl =>
+      'https://github.com/$githubOwner/$githubRepo';
+
+  static String get githubReleasesUrl => '$githubRepoUrl/releases';
+
+  /// 版本清单优先顺序见 [AppVersionService]：
+  /// 1) Release 资产 version.json
+  /// 2) 仓库 raw app/version.json
+  /// 3) GitHub API latest release
+  static String get appVersionManifestUrl =>
+      'https://github.com/$githubOwner/$githubRepo/releases/latest/download/version.json';
+
+  static String get appVersionManifestRawUrl =>
+      'https://raw.githubusercontent.com/$githubOwner/$githubRepo/master/app/version.json';
+
+  static String get githubLatestReleaseApiUrl =>
+      'https://api.github.com/repos/$githubOwner/$githubRepo/releases/latest';
+
   /// 快捷入口路径。
   static const String forumPath = '/forum';
   static const String checkinPath = '/checkin';
@@ -29,11 +56,6 @@ class AppConstants {
   static const String appActionPrefix = '/__app';
   static const String appActionCheckin = '/__app/checkin';
   static const String appActionSettings = '/__app/settings';
-
-  /// App 版本清单（公开 JSON，与 Web 登录无关）。
-  /// 部署示例见 `docs/api-samples/app_version.json`。
-  static const String appVersionManifestUrl =
-      'https://ecfc.fans/app/version.json';
 
   /// 允许在 WebView 内打开的主机（含子域）。
   static bool isAllowedHost(String? host) {

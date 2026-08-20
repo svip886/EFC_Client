@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/app_package_info.dart';
 import '../core/constants.dart';
 
-/// 远端版本清单（由站点或 CDN 托管的 JSON）。
+/// 远端版本清单（GitHub Release / 仓库 JSON）。
 class AppVersionManifest {
   const AppVersionManifest({
     required this.latestVersion,
@@ -35,6 +37,50 @@ class AppVersionManifest {
     );
   }
 
+  /// 从 GitHub Releases API `latest` 响应构造。
+  factory AppVersionManifest.fromGithubRelease(Map<String, dynamic> json) {
+    final tag = '${json['tag_name'] ?? ''}'.trim();
+    final version = tag.startsWith('v') || tag.startsWith('V')
+        ? tag.substring(1)
+        : tag;
+
+    // tag 可带 build：1.0.2+12
+    var name = version;
+    var build = 0;
+    final plus = version.split('+');
+    if (plus.length >= 2) {
+      name = plus.first;
+      build = int.tryParse(plus[1]) ?? 0;
+    }
+
+    String? apkUrl;
+    final assets = json['assets'];
+    if (assets is List) {
+      for (final a in assets) {
+        if (a is! Map) continue;
+        final n = '${a['name'] ?? ''}'.toLowerCase();
+        final url = a['browser_download_url'];
+        if (url is! String || url.isEmpty) continue;
+        if (n.endsWith('.apk') && apkUrl == null) {
+          apkUrl = url;
+        }
+      }
+    }
+
+    final body = json['body'];
+    final notes = body is String && body.trim().isNotEmpty ? body.trim() : null;
+    final htmlUrl = json['html_url'];
+
+    return AppVersionManifest(
+      latestVersion: name,
+      latestBuild: build,
+      notes: notes,
+      downloadUrl: apkUrl ??
+          (htmlUrl is String ? htmlUrl : AppConstants.githubReleasesUrl),
+      force: false,
+    );
+  }
+
   static int? _asInt(Object? v) {
     if (v is int) return v;
     if (v is num) return v.toInt();
@@ -44,19 +90,10 @@ class AppVersionManifest {
 }
 
 enum VersionCheckStatus {
-  /// 已是最新
   upToDate,
-
-  /// 有新版本
   updateAvailable,
-
-  /// 低于最低版本（建议强制更新）
   forceUpdate,
-
-  /// 清单不存在 / 网络失败
   unavailable,
-
-  /// 清单格式无效
   invalid,
 }
 
@@ -78,110 +115,166 @@ class VersionCheckResult {
       status == VersionCheckStatus.forceUpdate;
 }
 
-/// 检查 App 版本（与站点 Web 版本无关）。
+/// 检查 App 版本：GitHub Release 优先，兼容仓库内 version.json。
 class AppVersionService {
   AppVersionService._();
 
-  /// 不带 Cookie 的轻量 Dio，避免会话干扰公开清单。
   static final _dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 12),
-      receiveTimeout: const Duration(seconds: 12),
-      headers: const {'Accept': 'application/json'},
+      receiveTimeout: const Duration(seconds: 15),
+      headers: const {
+        'Accept': 'application/json',
+        'User-Agent': 'ecfc-app-version-check',
+      },
       validateStatus: (_) => true,
-      // 版本检查直连，跟随重定向
       followRedirects: true,
-      maxRedirects: 3,
+      maxRedirects: 5,
     ),
   );
 
   static Future<VersionCheckResult> check() async {
     final local = await AppPackageInfo.load();
+
+    // 1) Release 资产 version.json（CI 发布时上传）
+    final fromAsset = await _tryManifestJson(AppConstants.appVersionManifestUrl);
+    if (fromAsset != null) {
+      return _compare(local, fromAsset);
+    }
+
+    // 2) 仓库 raw app/version.json
+    final fromRaw =
+        await _tryManifestJson(AppConstants.appVersionManifestRawUrl);
+    if (fromRaw != null) {
+      return _compare(local, fromRaw);
+    }
+
+    // 3) GitHub API latest release
+    final fromApi = await _tryGithubLatestRelease();
+    if (fromApi != null) {
+      return _compare(local, fromApi);
+    }
+
+    return VersionCheckResult(
+      status: VersionCheckStatus.unavailable,
+      local: local,
+      message:
+          '暂无可用版本信息。请确认 GitHub 仓库 ${AppConstants.githubOwner}/${AppConstants.githubRepo} 已发布 Release。',
+    );
+  }
+
+  static Future<AppVersionManifest?> _tryManifestJson(String url) async {
     try {
-      final resp = await _dio.get<dynamic>(AppConstants.appVersionManifestUrl);
+      final resp = await _dio.get<dynamic>(url);
       final code = resp.statusCode ?? 0;
-      if (code == 404 || code == 403) {
-        return VersionCheckResult(
-          status: VersionCheckStatus.unavailable,
-          local: local,
-          message: '尚未配置版本清单（${AppConstants.appVersionManifestUrl}）',
-        );
-      }
-      if (code < 200 || code >= 300) {
-        return VersionCheckResult(
-          status: VersionCheckStatus.unavailable,
-          local: local,
-          message: '检查失败（HTTP $code）',
-        );
-      }
-
-      final data = resp.data;
-      Map<String, dynamic>? map;
-      if (data is Map<String, dynamic>) {
-        map = data;
-      } else if (data is Map) {
-        map = data.cast<String, dynamic>();
-      }
-      if (map == null) {
-        return VersionCheckResult(
-          status: VersionCheckStatus.invalid,
-          local: local,
-          message: '版本清单格式无效',
-        );
-      }
-
-      final remote = AppVersionManifest.fromJson(map);
-      if (remote.latestBuild <= 0 && remote.latestVersion.isEmpty) {
-        return VersionCheckResult(
-          status: VersionCheckStatus.invalid,
-          local: local,
-          message: '版本清单缺少 latestBuild / latestVersion',
-        );
-      }
-
-      final localBuild = local.build;
-      final minBuild = remote.minBuild ?? 0;
-      if (minBuild > 0 && localBuild < minBuild) {
-        return VersionCheckResult(
-          status: VersionCheckStatus.forceUpdate,
-          local: local,
-          remote: remote,
-          message: '当前版本过旧，请更新到 ${remote.latestVersion}',
-        );
-      }
-
-      if (remote.latestBuild > localBuild ||
-          (remote.latestBuild == localBuild &&
-              remote.latestVersion.isNotEmpty &&
-              remote.latestVersion != local.version &&
-              _isNewerVersionName(remote.latestVersion, local.version))) {
-        return VersionCheckResult(
-          status: remote.force
-              ? VersionCheckStatus.forceUpdate
-              : VersionCheckStatus.updateAvailable,
-          local: local,
-          remote: remote,
-          message: '发现新版本 ${remote.latestVersion}（${remote.latestBuild}）',
-        );
-      }
-
-      return VersionCheckResult(
-        status: VersionCheckStatus.upToDate,
-        local: local,
-        remote: remote,
-        message: '已是最新版本',
-      );
-    } catch (e, st) {
-      debugPrint('AppVersionService.check: $e\n$st');
-      return VersionCheckResult(
-        status: VersionCheckStatus.unavailable,
-        local: local,
-        message: '网络异常，暂时无法检查更新',
-      );
+      if (code < 200 || code >= 300) return null;
+      final map = _asStringKeyMap(resp.data);
+      if (map == null) return null;
+      final m = AppVersionManifest.fromJson(map);
+      if (m.latestBuild <= 0 && m.latestVersion.isEmpty) return null;
+      return m;
+    } catch (e) {
+      debugPrint('AppVersionService manifest $url: $e');
+      return null;
     }
   }
 
-  /// 极简 semver 比较：1.0.1 > 1.0.0；比不过则 false。
+  static Future<AppVersionManifest?> _tryGithubLatestRelease() async {
+    try {
+      final resp =
+          await _dio.get<dynamic>(AppConstants.githubLatestReleaseApiUrl);
+      final code = resp.statusCode ?? 0;
+      if (code == 404) return null;
+      if (code < 200 || code >= 300) return null;
+      final map = _asStringKeyMap(resp.data);
+      if (map == null) return null;
+
+      // 若 assets 含 version.json，再拉一次更准
+      final assets = map['assets'];
+      if (assets is List) {
+        for (final a in assets) {
+          if (a is! Map) continue;
+          final name = '${a['name'] ?? ''}'.toLowerCase();
+          final url = a['browser_download_url'];
+          if (name == 'version.json' && url is String) {
+            final nested = await _tryManifestJson(url);
+            if (nested != null) return nested;
+          }
+        }
+      }
+
+      final m = AppVersionManifest.fromGithubRelease(map);
+      if (m.latestVersion.isEmpty) return null;
+      return m;
+    } catch (e) {
+      debugPrint('AppVersionService github api: $e');
+      return null;
+    }
+  }
+
+  static Map<String, dynamic>? _asStringKeyMap(Object? data) {
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return data.cast<String, dynamic>();
+    if (data is String) {
+      try {
+        final decoded = jsonDecode(data);
+        if (decoded is Map) return decoded.cast<String, dynamic>();
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  static VersionCheckResult _compare(
+    AppPackageInfo local,
+    AppVersionManifest remote,
+  ) {
+    if (remote.latestBuild <= 0 && remote.latestVersion.isEmpty) {
+      return VersionCheckResult(
+        status: VersionCheckStatus.invalid,
+        local: local,
+        remote: remote,
+        message: '版本清单缺少 latestBuild / latestVersion',
+      );
+    }
+
+    final localBuild = local.build;
+    final minBuild = remote.minBuild ?? 0;
+    if (minBuild > 0 && localBuild < minBuild) {
+      return VersionCheckResult(
+        status: VersionCheckStatus.forceUpdate,
+        local: local,
+        remote: remote,
+        message: '当前版本过旧，请更新到 ${remote.latestVersion}',
+      );
+    }
+
+    final newerBuild = remote.latestBuild > localBuild;
+    final newerName = remote.latestVersion.isNotEmpty &&
+        remote.latestVersion != local.version &&
+        _isNewerVersionName(remote.latestVersion, local.version);
+
+    if (newerBuild ||
+        (remote.latestBuild == localBuild && newerName) ||
+        (remote.latestBuild <= 0 && newerName)) {
+      return VersionCheckResult(
+        status: remote.force
+            ? VersionCheckStatus.forceUpdate
+            : VersionCheckStatus.updateAvailable,
+        local: local,
+        remote: remote,
+        message:
+            '发现新版本 ${remote.latestVersion}${remote.latestBuild > 0 ? '（${remote.latestBuild}）' : ''}',
+      );
+    }
+
+    return VersionCheckResult(
+      status: VersionCheckStatus.upToDate,
+      local: local,
+      remote: remote,
+      message: '已是最新版本',
+    );
+  }
+
   static bool _isNewerVersionName(String remote, String local) {
     List<int> parts(String v) => v
         .split(RegExp(r'[^0-9]+'))

@@ -41,7 +41,7 @@ C:\private\project\app\ecfc\
 - **未读角标**：轮询 `GET /api/notifications/unread-summary`，用 `total` 更新桌面角标（启动后 / 回前台 / 翻页后）
 - **一键挂号**：Shortcut / 小组件 → `ecfc://action/checkin` → 同步 Cookie 后 `GET/POST /api/checkin`，SnackBar 反馈并打开 `/checkin`
 - **桌面小组件**：每日挂号卡片（连续天数 / 是否已挂），点按一键挂号
-- **App 设置**：头像下拉菜单注入「App 设置」；关于 / 版本号 / 检查更新（读 `https://ecfc.fans/app/version.json`，样本见 `docs/api-samples/app_version.json`）
+- **App 设置**：头像下拉菜单注入「App 设置」；关于 / 版权（Paranoid）/ 版本号 / GitHub 检查更新
 
 ## 明确不做（体验冲突）
 
@@ -61,7 +61,9 @@ C:\private\project\app\ecfc\
 ## 文案与品牌
 
 - 应用名：**私家E院**
+- 客户端版权：**© Paranoid**（App 设置 → 关于）
 - 可保留社区黑话：挂号、挂号费、病友
+- 发布渠道：GitHub Releases（见 `docs/RELEASE.md`）
 
 ## 运行与调试
 

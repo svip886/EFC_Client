@@ -71,12 +71,16 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
             children: [
               Text(
                 '最新：${remote?.latestVersion ?? '-'}'
-                '（${remote?.latestBuild ?? '-'}）\n'
+                '${(remote?.latestBuild ?? 0) > 0 ? '（${remote!.latestBuild}）' : ''}\n'
                 '当前：${result.local.versionLabel}',
               ),
               if (remote?.notes != null && remote!.notes!.trim().isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Text(remote.notes!.trim()),
+                Text(
+                  remote.notes!.trim(),
+                  maxLines: 8,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ],
           ),
@@ -93,13 +97,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                 if (url != null && url.isNotEmpty) {
                   await _openUrl(url);
                 } else {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('未配置下载地址，请从发布渠道获取安装包'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  await _openUrl(AppConstants.githubReleasesUrl);
                 }
               },
               child: const Text('去更新'),
@@ -143,6 +141,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final info = _info;
+    final year = DateTime.now().year;
 
     return Scaffold(
       appBar: AppBar(
@@ -161,7 +160,7 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
               ),
             ),
             title: Text(info?.appName ?? AppConstants.appName),
-            subtitle: const Text('私家E院 Flutter 客户端'),
+            subtitle: const Text('私家E院 Flutter 客户端（非官方）'),
           ),
           ListTile(
             leading: const Icon(Icons.tag_outlined),
@@ -184,8 +183,20 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
                 : () => _copyText('应用 ID', info.packageName),
           ),
           ListTile(
+            leading: const Icon(Icons.copyright_outlined),
+            title: const Text('版权'),
+            subtitle: Text('${AppConstants.appCopyrightLine} $year'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.code_outlined),
+            title: const Text('开源仓库'),
+            subtitle: Text(AppConstants.githubRepoUrl),
+            trailing: const Icon(Icons.open_in_new, size: 18),
+            onTap: () => _openUrl(AppConstants.githubRepoUrl),
+          ),
+          ListTile(
             leading: const Icon(Icons.public_outlined),
-            title: const Text('官方网站'),
+            title: const Text('社区网站'),
             subtitle: Text(AppConstants.baseUrl),
             trailing: const Icon(Icons.open_in_new, size: 18),
             onTap: () => _openUrl(AppConstants.baseUrl),
@@ -206,17 +217,24 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
             title: const Text('检查新版本'),
             subtitle: Text(
               _lastCheck?.message ??
-                  '从 ${Uri.parse(AppConstants.appVersionManifestUrl).host} 拉取清单',
+                  '从 GitHub Releases 检查（${AppConstants.githubOwner}/${AppConstants.githubRepo}）',
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _checking ? null : _checkVersion,
+          ),
+          ListTile(
+            leading: const Icon(Icons.new_releases_outlined),
+            title: const Text('全部发行版'),
+            subtitle: Text(AppConstants.githubReleasesUrl),
+            trailing: const Icon(Icons.open_in_new, size: 18),
+            onTap: () => _openUrl(AppConstants.githubReleasesUrl),
           ),
           if (_lastCheck?.remote != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
-                '清单最新：${_lastCheck!.remote!.latestVersion}'
-                '（build ${_lastCheck!.remote!.latestBuild}）',
+                '远端：${_lastCheck!.remote!.latestVersion}'
+                '${_lastCheck!.remote!.latestBuild > 0 ? '（build ${_lastCheck!.remote!.latestBuild}）' : ''}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
@@ -227,11 +245,12 @@ class _AppSettingsPageState extends State<AppSettingsPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
             child: Text(
-              '本页为 App 客户端设置，与网站内「设置」相互独立。'
-              '检查更新依赖公开清单：\n${AppConstants.appVersionManifestUrl}',
+              '本页为 App 客户端设置，与网站内「设置」相互独立。\n'
+              '客户端由 ${AppConstants.appCopyright} 开发维护，与 ecfc.fans 官方站点无隶属关系。\n'
+              '版本检查顺序：Release 资产 version.json → 仓库 app/version.json → GitHub latest API。',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.outline,
-                height: 1.4,
+                height: 1.45,
               ),
             ),
           ),

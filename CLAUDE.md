@@ -82,4 +82,11 @@ flutter test
 ## 提交约定
 
 - 不要把 `eason_fans_session` 等真实 Cookie/密码写入仓库或 `docs/api-samples/`。
-- 每确认一条新接口，更新 `docs/ECFC_API.md` 对应小节，并追加脱敏样本到 `docs/api-samples/`。
+- 每确认一条新接口，更新 `docs/ECFC_API.md` 对应章节，并追加脱敏样本到 `docs/api-samples/`。
+
+## 发布 / 版本
+
+- 客户端版权：**Paranoid**；发版与检查更新走 GitHub（`docs/RELEASE.md`）。
+- 版本号：`pubspec.yaml` 的 `x.y.z+build`；打 `v*` tag 触发 `.github/workflows/release.yml`。
+- 若 GitHub 仓库不是 `Paranoid/ecfc`，同步改 `lib/core/constants.dart` 的 `githubOwner` / `githubRepo`。
+- 安装调试包用 `adb install -r`，**禁止卸载**（会清 WebView 登录态）。

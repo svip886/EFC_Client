@@ -3,6 +3,6 @@
   "latestBuild": 1,
   "minBuild": 1,
   "force": false,
-  "notes": "示例：与仓库 app/version.json 同结构。正式以 GitHub Release 资产为准。",
+  "notes": "初始版本。由 GitHub Actions 在打 tag 时自动更新此文件并上传到 Release。",
   "downloadUrl": "https://github.com/Paranoid/ecfc/releases/latest"
 }

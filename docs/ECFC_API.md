@@ -41,7 +41,7 @@
 - 帖子详情 `/posts/{postId}`
 - 搜索 `/search`
 - 设置 `/settings`（网站内设置）
-- App 版本清单（客户端自用，公开）：`GET /app/version.json`（样本 `api-samples/app_version.json`；站点需自行部署）
+- App 版本清单改由 **GitHub Releases** 托管（见 `docs/RELEASE.md` / `app/version.json`），不再依赖站点路径
 
 ### 2.2 主题
 
