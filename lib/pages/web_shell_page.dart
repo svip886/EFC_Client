@@ -35,6 +35,8 @@ class _WebShellPageState extends State<WebShellPage> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFFFAFAFA))
+      // 关闭边界 overscroll，避免顶/底回弹带动站点 fixed 导航栏一起晃。
+      ..setOverScrollMode(WebViewOverScrollMode.never)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (p) {
@@ -54,6 +56,7 @@ class _WebShellPageState extends State<WebShellPage> {
               _loading = false;
               _progress = 100;
             });
+            unawaited(_injectOverscrollCss());
           },
           onWebResourceError: (err) {
             if (err.isForMainFrame == true && mounted) {
@@ -111,6 +114,23 @@ class _WebShellPageState extends State<WebShellPage> {
         const PlatformWebViewCookieManagerCreationParams(),
       );
       await cookieManager.setAcceptThirdPartyCookies(platform, true);
+    }
+  }
+
+  /// Chromium 弹性 overscroll 兜底：即使原生 View 已 never，部分版本仍会拉伸 DOM。
+  Future<void> _injectOverscrollCss() async {
+    try {
+      await _controller.runJavaScript('''
+(function () {
+  if (document.getElementById('ecfc-overscroll-fix')) return;
+  var s = document.createElement('style');
+  s.id = 'ecfc-overscroll-fix';
+  s.textContent = 'html, body { overscroll-behavior: none; overscroll-behavior-y: none; }';
+  (document.head || document.documentElement).appendChild(s);
+})();
+''');
+    } catch (_) {
+      // 页面卸载中注入失败可忽略
     }
   }
 

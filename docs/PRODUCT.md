@@ -41,6 +41,10 @@ C:\private\project\app\ecfc\
 
 - **原生下拉刷新**：`RefreshIndicator` 包裹 WebView 会抢走站内滚动，已移除；刷新交给站点自身或错误页「重试」
 
+## 滚动边界
+
+- WebView `overScrollMode = never`，并注入 `overscroll-behavior: none`，避免顶/底回弹时站点 fixed 导航栏跟着晃
+
 ## 可选后续增强
 
 - 推送通知、角标（需后端设备注册）
