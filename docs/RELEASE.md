@@ -6,8 +6,9 @@
 
 | 项 | 值（可在 `lib/core/constants.dart` 修改） |
 |---|---|
-| Owner | `Paranoid` |
-| Repo | `ecfc` |
+| Owner | `svip886` |
+| Repo | `EFC_Client` |
+| URL | https://github.com/svip886/EFC_Client |
 | 版本清单（仓库） | [`app/version.json`](../app/version.json) |
 | 版本清单（Release 资产） | `version.json`（与 APK 一并上传） |
 

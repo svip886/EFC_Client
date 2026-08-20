@@ -38,10 +38,11 @@ ECFC 业务域名请**直连**；pub / GitHub 可用本地代理。
 
 检查更新读取：
 
-- `https://github.com/Paranoid/ecfc/releases/latest/download/version.json`
+- `https://github.com/svip886/EFC_Client/releases/latest/download/version.json`
 - 回退：`app/version.json`（raw）与 GitHub API
 
-> 若仓库不在 `Paranoid/ecfc`，请改 `lib/core/constants.dart` 中的 `githubOwner` / `githubRepo`。
+仓库：https://github.com/svip886/EFC_Client  
+> 若迁移仓库，请改 `lib/core/constants.dart` 中的 `githubOwner` / `githubRepo`。
 
 ## 许可证
 

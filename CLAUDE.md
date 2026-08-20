@@ -88,5 +88,5 @@ flutter test
 
 - 客户端版权：**Paranoid**；发版与检查更新走 GitHub（`docs/RELEASE.md`）。
 - 版本号：`pubspec.yaml` 的 `x.y.z+build`；打 `v*` tag 触发 `.github/workflows/release.yml`。
-- 若 GitHub 仓库不是 `Paranoid/ecfc`，同步改 `lib/core/constants.dart` 的 `githubOwner` / `githubRepo`。
+- GitHub 仓库默认 `svip886/EFC_Client`；若变更，同步改 `lib/core/constants.dart` 的 `githubOwner` / `githubRepo`。
 - 安装调试包用 `adb install -r`，**禁止卸载**（会清 WebView 登录态）。

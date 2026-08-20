@@ -25,8 +25,8 @@ class AppConstants {
 
   /// GitHub 发布仓库（检查更新 / Release 下载）。
   /// 若 fork 或改名，只改这两处即可。
-  static const String githubOwner = 'Paranoid';
-  static const String githubRepo = 'ecfc';
+  static const String githubOwner = 'svip886';
+  static const String githubRepo = 'EFC_Client';
 
   static String get githubRepoUrl =>
       'https://github.com/$githubOwner/$githubRepo';

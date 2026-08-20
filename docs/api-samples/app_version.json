@@ -4,5 +4,5 @@
   "minBuild": 1,
   "force": false,
   "notes": "示例：与仓库 app/version.json 同结构。正式以 GitHub Release 资产为准。",
-  "downloadUrl": "https://github.com/Paranoid/ecfc/releases/latest"
+  "downloadUrl": "https://github.com/svip886/EFC_Client/releases/latest"
 }

@@ -4,5 +4,5 @@
   "minBuild": 1,
   "force": false,
   "notes": "初始版本。由 GitHub Actions 在打 tag 时自动更新此文件并上传到 Release。",
-  "downloadUrl": "https://github.com/Paranoid/ecfc/releases/latest"
+  "downloadUrl": "https://github.com/svip886/EFC_Client/releases/latest"
 }
