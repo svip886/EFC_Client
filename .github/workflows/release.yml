@@ -1,5 +1,11 @@
 name: Release
 
+# 目标：能打包出多平台产物并挂到 GitHub Release（不要求商店上架/签名分发）。
+# - Android: release APK（1 个）
+# - Windows: zip（内含 exe + 依赖；运行需 WebView2）
+# - macOS: zip（.app）
+# - iOS: 无签名 ipa（flutter build ipa --no-codesign），仅作构建验证/自签原料
+
 on:
   push:
     tags:
@@ -14,28 +20,21 @@ on:
 permissions:
   contents: write
 
+env:
+  PUB_CACHE: ${{ github.workspace }}/.pub-cache
+
 jobs:
-  android:
-    name: Android APK
+  version:
+    name: Resolve version
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.ver.outputs.tag }}
+      version: ${{ steps.ver.outputs.version }}
+      build: ${{ steps.ver.outputs.build }}
+      full: ${{ steps.ver.outputs.full }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Resolve version
-        id: ver
+      - uses: actions/checkout@v4
+      - id: ver
         shell: bash
         run: |
           set -euo pipefail
@@ -52,7 +51,6 @@ jobs:
             TAG="v${PUB_NAME}"
           fi
 
-          # Display version: prefer pubspec name; allow tag v1.2.3 to override name
           NAME="$PUB_NAME"
           BUILD="$PUB_BUILD"
           TRAW="${TAG#v}"
@@ -72,41 +70,191 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Resolved tag=${TAG} full=${FULL}"
 
+  android:
+    name: Android APK
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Sync pubspec version
+        run: |
+          set -euo pipefail
+          sed -i -E "s/^version: .*/version: ${{ needs.version.outputs.full }}/" pubspec.yaml
+          grep -E '^version:' pubspec.yaml
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      - run: flutter build apk --release
+      - name: Stage APK
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          VER="${{ needs.version.outputs.version }}"
+          BUILD="${{ needs.version.outputs.build }}"
+          APK="ecfc-${VER}+${BUILD}-android.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/${APK}"
+          echo "apk=${APK}" >> "$GITHUB_ENV"
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: dist/*
+          if-no-files-found: error
+
+  windows:
+    name: Windows
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
       - name: Sync pubspec version
         shell: bash
         run: |
           set -euo pipefail
-          FULL="${{ steps.ver.outputs.full }}"
-          sed -i -E "s/^version: .*/version: ${FULL}/" pubspec.yaml
+          sed -i -E "s/^version: .*/version: ${{ needs.version.outputs.full }}/" pubspec.yaml
           grep -E '^version:' pubspec.yaml
+      - run: flutter config --enable-windows-desktop
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Zip bundle
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ver = '${{ needs.version.outputs.version }}'
+          $build = '${{ needs.version.outputs.build }}'
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $root = 'build/windows/x64/runner/Release'
+          if (-not (Test-Path $root)) {
+            $root = Get-ChildItem -Path build/windows -Recurse -Directory -Filter Release |
+              Select-Object -First 1 -ExpandProperty FullName
+          }
+          Write-Host "Packing $root"
+          $out = "dist/ecfc-$ver+$build-windows-x64.zip"
+          if (Test-Path $out) { Remove-Item $out -Force }
+          Compress-Archive -Path (Join-Path $root '*') -DestinationPath $out -Force
+          Get-ChildItem dist | Format-Table Name, Length
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: dist/*
+          if-no-files-found: error
 
-      - name: Pub get
-        run: flutter pub get
-
-      - name: Analyze
-        run: flutter analyze --no-fatal-infos
-
-      - name: Test
-        run: flutter test
-
-      - name: Build APK (release)
-        run: flutter build apk --release
-
-      - name: Prepare artifacts
-        id: art
-        shell: bash
+  macos:
+    name: macOS
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Sync pubspec version
         run: |
           set -euo pipefail
-          VER="${{ steps.ver.outputs.version }}"
-          BUILD="${{ steps.ver.outputs.build }}"
-          TAG="${{ steps.ver.outputs.tag }}"
+          sed -i '' -E "s/^version: .*/version: ${{ needs.version.outputs.full }}/" pubspec.yaml
+          grep -E '^version:' pubspec.yaml
+      - run: flutter config --enable-macos-desktop
+      - run: flutter pub get
+      - run: flutter build macos --release
+      - name: Zip .app
+        run: |
+          set -euo pipefail
+          VER="${{ needs.version.outputs.version }}"
+          BUILD="${{ needs.version.outputs.build }}"
+          mkdir -p dist
+          APP=$(find build/macos -name '*.app' -type d | head -n1)
+          echo "Found app: $APP"
+          OUT="ecfc-${VER}+${BUILD}-macos.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "dist/${OUT}"
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-zip
+          path: dist/*
+          if-no-files-found: error
+
+  ios:
+    name: iOS (unsigned)
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Sync pubspec version
+        run: |
+          set -euo pipefail
+          sed -i '' -E "s/^version: .*/version: ${{ needs.version.outputs.full }}/" pubspec.yaml
+          grep -E '^version:' pubspec.yaml
+      - run: flutter pub get
+      # 无开发者证书：只求能编过；产物为 unsigned ipa / 构建目录打包
+      - name: Build iOS no-codesign
+        run: |
+          set -euo pipefail
+          flutter build ios --release --no-codesign
+      - name: Package unsigned payload zip
+        run: |
+          set -euo pipefail
+          VER="${{ needs.version.outputs.version }}"
+          BUILD="${{ needs.version.outputs.build }}"
+          mkdir -p dist
+          APP=$(find build/ios -name 'Runner.app' -type d | head -n1)
+          echo "Found: $APP"
+          # 做成 Payload 结构，方便有证书时再签
+          STAGE=$(mktemp -d)
+          mkdir -p "$STAGE/Payload"
+          cp -R "$APP" "$STAGE/Payload/"
+          OUT="ecfc-${VER}+${BUILD}-ios-unsigned.zip"
+          (cd "$STAGE" && zip -r "$GITHUB_WORKSPACE/dist/${OUT}" Payload)
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub Release
+    needs: [version, android, windows, macos, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Collect + version.json
+        id: pack
+        run: |
+          set -euo pipefail
+          VER="${{ needs.version.outputs.version }}"
+          BUILD="${{ needs.version.outputs.build }}"
+          TAG="${{ needs.version.outputs.tag }}"
           REPO="${{ github.repository }}"
           mkdir -p dist
-          SRC="build/app/outputs/flutter-apk/app-release.apk"
-          APK_NAME="ecfc-${VER}+${BUILD}-release.apk"
-          cp "$SRC" "dist/${APK_NAME}"
-          cp "$SRC" "dist/ecfc-release.apk"
-          DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${APK_NAME}"
+          find artifacts -type f -print -exec cp -v {} dist/ \;
+          ls -la dist
+
+          APK=$(ls dist/*-android.apk | head -n1 | xargs -n1 basename)
+          WIN=$(ls dist/*-windows-x64.zip 2>/dev/null | head -n1 | xargs -n1 basename || true)
+          MAC=$(ls dist/*-macos.zip 2>/dev/null | head -n1 | xargs -n1 basename || true)
+          IOS=$(ls dist/*-ios-unsigned.zip 2>/dev/null | head -n1 | xargs -n1 basename || true)
+
+          DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${APK}"
           python3 - <<PY
           import json
           from pathlib import Path
@@ -115,27 +263,27 @@ jobs:
             "latestBuild": int("${BUILD}"),
             "minBuild": 1,
             "force": False,
-            "notes": "GitHub Release ${TAG}",
+            "notes": "GitHub Release ${TAG} (Android/Windows/macOS/iOS-unsigned)",
             "downloadUrl": "${DOWNLOAD_URL}",
+            "assets": {
+              "androidApk": "${APK}",
+              "windowsZip": "${WIN}",
+              "macosZip": "${MAC}",
+              "iosUnsignedZip": "${IOS}",
+            },
           }
           text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
           Path("dist/version.json").write_text(text, encoding="utf-8")
           Path("app/version.json").write_text(text, encoding="utf-8")
           print(text)
           PY
-          echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
           ls -la dist
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.ver.outputs.tag }}
-          name: ${{ steps.ver.outputs.tag }}
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: ${{ needs.version.outputs.tag }}
           generate_release_notes: true
-          files: |
-            dist/${{ steps.art.outputs.apk_name }}
-            dist/ecfc-release.apk
-            dist/version.json
+          files: dist/*
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

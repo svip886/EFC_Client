@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "ecfc_app" "\0"
+            VALUE "CompanyName", "Paranoid" "\0"
+            VALUE "FileDescription", "私家E院" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "ecfc_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Paranoid. All rights reserved." "\0"
             VALUE "OriginalFilename", "ecfc_app.exe" "\0"
-            VALUE "ProductName", "ecfc_app" "\0"
+            VALUE "ProductName", "私家E院" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -9,8 +9,8 @@
 ## 功能
 
 - 全屏嵌入官方响应式站点（登录态由 WebView Cookie 托管）
-- Deep Link / App Shortcuts / 系统分享接收
-- 一键挂号 + 每日挂号桌面小组件
+- Deep Link / App Shortcuts / 系统分享接收（Android 优先）
+- 一键挂号 + 每日挂号桌面小组件（Android）
 - 未读角标（轮询通知摘要）
 - App 设置：关于、版权、GitHub 检查更新
 
@@ -30,19 +30,20 @@ ECFC 业务域名请**直连**；pub / GitHub 可用本地代理。
 
 见 [docs/RELEASE.md](docs/RELEASE.md)。
 
-简要：
-
 1. 修改 `pubspec.yaml` → `version: x.y.z+build`
-2. `git tag vX.Y.Z && git push origin vX.Y.Z`
-3. GitHub Actions 产出 APK + `version.json` 到 Releases
+2. `git tag vX.Y.Z && git push origin master --tags`
+3. GitHub Actions 产出：
+   - `*-android.apk`
+   - `*-windows-x64.zip`（需 WebView2）
+   - `*-macos.zip`
+   - `*-ios-unsigned.zip`（无签名，仅构建验证）
+   - `version.json`
 
-检查更新读取：
+检查更新：
 
-- `https://github.com/svip886/EFC_Client/releases/latest/download/version.json`
-- 回退：`app/version.json`（raw）与 GitHub API
+- https://github.com/svip886/EFC_Client/releases/latest/download/version.json
 
-仓库：https://github.com/svip886/EFC_Client  
-> 若迁移仓库，请改 `lib/core/constants.dart` 中的 `githubOwner` / `githubRepo`。
+仓库：https://github.com/svip886/EFC_Client
 
 ## 许可证
 
