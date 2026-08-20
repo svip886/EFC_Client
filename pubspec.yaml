@@ -1,5 +1,5 @@
-﻿name: ecfc_app
-description: "绉佸E闄?Flutter 瀹㈡埛绔紙WebView 澹?+ 鍘熺敓澧炲己锛?
+name: ecfc_app
+description: "私家E院 Flutter 客户端（WebView 壳 + 原生增强）"
 publish_to: 'none'
 version: 1.0.1+2
 
@@ -12,17 +12,19 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # 涓荤晫闈細宓屽叆瀹樻柟鍝嶅簲寮忕珯鐐?  webview_flutter: ^4.10.0
+  # 主界面：嵌入官方响应式站点
+  webview_flutter: ^4.10.0
   webview_flutter_android: ^4.3.1
   url_launcher: ^6.3.1
 
-  # Deep Link锛堝喎/鐑惎鍔級
+  # Deep Link（冷/热启动）
   app_links: ^6.3.3
 
-  # 妗岄潰瑙掓爣锛堟湭璇伙級
+  # 桌面角标（未读）
   app_badge_plus: ^1.2.3
 
-  # 棰勭暀锛氭帹閫併€佸揩鎹锋寕鍙风瓑锛圖io + Cookie 涓?WebView 浼氳瘽鍚屾锛?  dio: ^5.7.0
+  # 预留：推送、快捷挂号等（Dio + Cookie 与 WebView 会话同步）
+  dio: ^5.7.0
   cookie_jar: ^4.0.8
   dio_cookie_manager: ^3.1.1
   path_provider: ^2.1.5
@@ -40,4 +42,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
