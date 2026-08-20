@@ -33,11 +33,13 @@ ECFC 业务域名请**直连**；pub / GitHub 可用本地代理。
 1. 修改 `pubspec.yaml` → `version: x.y.z+build`
 2. `git tag vX.Y.Z && git push origin master --tags`
 3. GitHub Actions 产出：
-   - `*-android.apk`
-   - `*-windows-x64.zip`（需 WebView2）
-   - `*-macos.zip`
-   - `*-ios-unsigned.zip`（无签名，仅构建验证）
+   - `ecfc-<version>-android.apk`
+   - `ecfc-<version>-windows-x64.zip`（需 WebView2）
+   - `ecfc-<version>-macos.zip`
+   - `ecfc-<version>-ios-unsigned.zip`（无签名，仅构建验证）
    - `version.json`
+
+文件名**不含** `+build`（构建号只写在 `pubspec` / version.json 字段里）。
 
 检查更新：
 

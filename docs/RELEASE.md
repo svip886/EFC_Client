@@ -23,12 +23,13 @@
 | 产物 | Runner | 说明 |
 |---|---|---|
 | `ecfc-*-android.apk` | ubuntu | 可侧载（当前 debug 签名配置见 `android/app/build.gradle.kts`） |
-| `ecfc-*-windows-x64.zip` | windows | 解压运行；需系统已装 [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) |
+| `ecfc-*-windows-x64.zip` | windows | 解压运行；需 [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) |
 | `ecfc-*-macos.zip` | macos | 内含 `.app`；未公证，本机可能需右键打开 |
 | `ecfc-*-ios-unsigned.zip` | macos | `Payload/Runner.app`，**无签名**；仅构建验证，真机需自行签名 |
 | `version.json` | — | App「检查新版本」读取；`downloadUrl` 默认指向 Android APK |
 
-每个平台 **只上传一个主文件**（Android 不再双份 APK）。
+文件名只带 **对外版本号**（如 `ecfc-1.0.2-android.apk`），**不含** `+build`。  
+`pubspec.yaml` 里仍写 `x.y.z+build` 供 Android versionCode 使用。
 
 也可：`Actions` → `Release` → `Run workflow`。
 
@@ -48,7 +49,7 @@
 
 - **Android 专有**：系统分享、Shortcuts、桌面小组件、厂商角标 — 其它平台自动降级，不影响 WebView 主壳。
 - **iOS/macOS**：已改 Bundle ID `fans.ecfc.app`、显示名、URL Scheme `ecfc`、macOS 网络权限；**不做商店上架/公证**。
-- **Windows**：资源信息改为私家E院 / Paranoid。
+- **Windows**：使用 `webview_windows`（WebView2）。未装 Runtime 时会提示下载；资源信息为私家E院 / Paranoid。
 - 正式签名（Play / App Store / 公证）以后再说。
 
 ## 版权

@@ -5,6 +5,7 @@ import 'core/constants.dart';
 import 'core/deep_link_bus.dart';
 import 'core/share_intent.dart';
 import 'pages/web_shell_page.dart';
+import 'pages/windows_web_shell_page.dart';
 import 'services/unread_badge_service.dart';
 
 Future<void> main() async {
@@ -33,6 +34,7 @@ class EcfcApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final initial = DeepLinkBus.initialUri;
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
@@ -47,7 +49,10 @@ class EcfcApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       themeMode: ThemeMode.system,
-      home: WebShellPage(initialUrl: DeepLinkBus.initialUri),
+      // Windows 无 webview_flutter 实现，必须走 WebView2 插件，否则整页灰屏。
+      home: useWindowsWebView
+          ? WindowsWebShellPage(initialUrl: initial)
+          : WebShellPage(initialUrl: initial),
     );
   }
 }
