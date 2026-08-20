@@ -11,7 +11,18 @@
             android:targetPackage="fans.ecfc.app"
             android:targetClass="fans.ecfc.app.MainActivity"
             android:data="ecfc://forum" />
-        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="quick_checkin"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_checkin"
+        android:shortcutShortLabel="@string/shortcut_quick_checkin_short"
+        android:shortcutLongLabel="@string/shortcut_quick_checkin_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="fans.ecfc.app"
+            android:targetClass="fans.ecfc.app.MainActivity"
+            android:data="ecfc://action/checkin" />
     </shortcut>
     <shortcut
         android:shortcutId="checkin"

@@ -271,6 +271,7 @@
 - `GET /api/points/today`
 - `GET /api/checkin/messages?date=YYYY-MM-DD&sort=latest&scope=public|friends&page=1&pageSize=7`
 - 执行签到的 `POST /api/checkin` Body（mood/message）待补全（避免重复签到未强行 POST）
+  - App 一键挂号：先 `GET` 若未 `checkedToday` 再 `POST`（空 body，失败则再试 `{mood:"calm"}`）
 
 ### 5.9 搜索
 

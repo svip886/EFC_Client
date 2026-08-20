@@ -39,6 +39,8 @@ C:\private\project\app\ecfc\
 - **外部分享接收**：系统「分享」到私家E院（`text/plain`）；正文含 `ecfc.fans` / `ecfc://` 则打开对应页，否则进 `/search?q=`
 - **会话同步**：页面加载完成后把 WebView Cookie（`eason_fans_session`）写入 Dio CookieJar
 - **未读角标**：轮询 `GET /api/notifications/unread-summary`，用 `total` 更新桌面角标（启动后 / 回前台 / 翻页后）
+- **一键挂号**：Shortcut / 小组件 → `ecfc://action/checkin` → 同步 Cookie 后 `GET/POST /api/checkin`，SnackBar 反馈并打开 `/checkin`
+- **桌面小组件**：每日挂号卡片（连续天数 / 是否已挂），点按一键挂号
 
 ## 明确不做（体验冲突）
 
@@ -51,9 +53,9 @@ C:\private\project\app\ecfc\
 ## 可选后续增强
 
 - 推送通知（FCM，需后端设备注册）
-- 快捷挂号小组件 / 一键挂号 Shortcut（已有 Cookie 同步，可直接调 checkin API）
 - 正式 App Links（`https://ecfc.fans/.well-known/assetlinks.json`）
 - 从 App 内「分享出去」（Web 已有分享时可不做）
+- 确认 `POST /api/checkin` 完整 body（mood/message）后优化一键挂号默认心情
 
 ## 文案与品牌
 

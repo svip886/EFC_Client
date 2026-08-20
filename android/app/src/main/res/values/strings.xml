@@ -4,7 +4,10 @@
     <string name="shortcut_forum_short">E院广场</string>
     <string name="shortcut_forum_long">打开 E院广场</string>
     <string name="shortcut_checkin_short">每日挂号</string>
-    <string name="shortcut_checkin_long">打开每日挂号</string>
+    <string name="shortcut_checkin_long">打开每日挂号页</string>
+    <string name="shortcut_quick_checkin_short">一键挂号</string>
+    <string name="shortcut_quick_checkin_long">同步会话并立即挂号</string>
     <string name="shortcut_notifications_short">消息</string>
     <string name="shortcut_notifications_long">打开消息中心</string>
+    <string name="widget_checkin_description">显示挂号状态，点按一键挂号</string>
 </resources>

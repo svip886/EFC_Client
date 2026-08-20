@@ -9,12 +9,13 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import '../core/constants.dart';
 import '../core/deep_link_bus.dart';
 import '../core/session_cookie_sync.dart';
+import '../services/checkin_quick_action.dart';
 import '../services/unread_badge_service.dart';
 
 /// 私家E院主壳：全屏 WebView 承载官方响应式站点。
 ///
 /// - 系统返回键优先 Web 历史
-/// - Deep Link / Shortcuts 经 [DeepLinkBus] 导航
+/// - Deep Link / Shortcuts / 一键挂号经 [DeepLinkBus] 导航
 class WebShellPage extends StatefulWidget {
   const WebShellPage({super.key, this.initialUrl});
 
@@ -29,6 +30,7 @@ class _WebShellPageState extends State<WebShellPage> {
   StreamSubscription<Uri>? _linkSub;
   var _loading = true;
   var _progress = 0;
+  var _checkinBusy = false;
   String? _error;
 
   @override
@@ -59,10 +61,11 @@ class _WebShellPageState extends State<WebShellPage> {
               _progress = 100;
             });
             unawaited(_injectOverscrollCss());
-            // 登录/跳转后把会话灌进 Dio，并刷新角标
+            // 登录/跳转后把会话灌进 Dio，并刷新角标 / 挂号小组件
             unawaited(() async {
               await SessionCookieSync.syncFromWebView();
               await UnreadBadgeService.instance.refresh();
+              await CheckinQuickAction.refreshWidgetOnly();
             }());
           },
           onWebResourceError: (err) {
@@ -78,6 +81,10 @@ class _WebShellPageState extends State<WebShellPage> {
           onNavigationRequest: (request) {
             final uri = Uri.tryParse(request.url);
             if (uri == null) return NavigationDecision.prevent;
+            if (AppConstants.isAppAction(uri)) {
+              unawaited(_handleAppAction(uri));
+              return NavigationDecision.prevent;
+            }
             if (_shouldOpenExternally(uri)) {
               unawaited(_openExternal(uri));
               return NavigationDecision.prevent;
@@ -92,12 +99,20 @@ class _WebShellPageState extends State<WebShellPage> {
     final start = widget.initialUrl ??
         DeepLinkBus.initialUri ??
         AppConstants.homeUri;
-    unawaited(_controller.loadRequest(start));
+
+    if (AppConstants.isAppAction(start)) {
+      // 冷启动就是一键挂号：先打开挂号页，再跑 API
+      unawaited(_controller.loadRequest(AppConstants.uriForPath(AppConstants.checkinPath)));
+      unawaited(_handleAppAction(start));
+    } else {
+      unawaited(_controller.loadRequest(start));
+    }
 
     _linkSub = DeepLinkBus.stream.listen((uri) {
       if (!mounted) return;
-      // 跳过与冷启动重复的那条
-      if (uri == DeepLinkBus.initialUri &&
+      // 跳过与冷启动重复的那条（非 App Action）
+      if (!AppConstants.isAppAction(uri) &&
+          uri == DeepLinkBus.initialUri &&
           uri == start &&
           widget.initialUrl == null) {
         return;
@@ -133,7 +148,8 @@ class _WebShellPageState extends State<WebShellPage> {
   var s = document.createElement('style');
   s.id = 'ecfc-overscroll-fix';
   s.textContent = 'html, body { overscroll-behavior: none; overscroll-behavior-y: none; }';
-  (document.head || document.documentElement).appendChild(s);
+  var root = document.head || document.documentElement || document.body;
+  if (root) root.appendChild(s);
 })();
 ''');
     } catch (_) {
@@ -172,12 +188,57 @@ class _WebShellPageState extends State<WebShellPage> {
   }
 
   Future<void> _navigateTo(Uri uri) async {
+    if (AppConstants.isAppAction(uri)) {
+      await _handleAppAction(uri);
+      return;
+    }
     setState(() {
       _error = null;
       _loading = true;
       _progress = 0;
     });
     await _controller.loadRequest(uri);
+  }
+
+  Future<void> _handleAppAction(Uri uri) async {
+    if (uri.path == AppConstants.appActionCheckin ||
+        uri.path.startsWith('${AppConstants.appActionCheckin}/')) {
+      await _runQuickCheckin();
+      return;
+    }
+  }
+
+  Future<void> _runQuickCheckin() async {
+    if (_checkinBusy) return;
+    setState(() => _checkinBusy = true);
+    try {
+      final result = await CheckinQuickAction.run();
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.snackbarText),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      switch (result.kind) {
+        case CheckinQuickKind.needLogin:
+          await _controller.loadRequest(
+            AppConstants.uriForPath(
+              '/login?next=${Uri.encodeComponent(AppConstants.checkinPath)}',
+            ),
+          );
+        case CheckinQuickKind.already:
+        case CheckinQuickKind.success:
+        case CheckinQuickKind.failed:
+          await _controller.loadRequest(
+            AppConstants.uriForPath(AppConstants.checkinPath),
+          );
+      }
+    } finally {
+      if (mounted) setState(() => _checkinBusy = false);
+    }
   }
 
   Future<void> _reload() async {
@@ -229,6 +290,34 @@ class _WebShellPageState extends State<WebShellPage> {
                         ? _progress / 100
                         : null,
                     minHeight: 2,
+                  ),
+                ),
+              if (_checkinBusy)
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 24,
+                  child: Center(
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            SizedBox(width: 12),
+                            Text('正在挂号…'),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               if (_error != null)

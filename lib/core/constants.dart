@@ -24,6 +24,11 @@ class AppConstants {
   static const String checkinPath = '/checkin';
   static const String notificationsPath = '/notifications';
 
+  /// App 内部动作前缀（不交给 WebView 加载）。
+  /// 例：`/__app/checkin` = 一键挂号 API。
+  static const String appActionPrefix = '/__app';
+  static const String appActionCheckin = '/__app/checkin';
+
   /// 允许在 WebView 内打开的主机（含子域）。
   static bool isAllowedHost(String? host) {
     if (host == null || host.isEmpty) return false;
@@ -59,6 +64,7 @@ class AppConstants {
     if (scheme == appScheme) {
       // ecfc://forum/extra → /forum/extra
       // ecfc:///path → /path
+      // ecfc://action/checkin → /__app/checkin（一键挂号）
       final buf = StringBuffer();
       if (uri.host.isNotEmpty) {
         buf.write('/${uri.host}');
@@ -69,6 +75,14 @@ class AppConstants {
       }
       var path = buf.toString();
       if (path.isEmpty || path == '/') path = homePath;
+
+      // 别名：一键挂号
+      if (path == '/action/checkin' ||
+          path == '/checkin/do' ||
+          path == '/checkin/quick') {
+        path = appActionCheckin;
+      }
+
       return Uri(
         scheme: 'https',
         host: 'ecfc.fans',
@@ -79,6 +93,16 @@ class AppConstants {
     }
 
     return null;
+  }
+
+  /// 是否为 App 内部动作 URL（由壳处理，不 loadRequest）。
+  static bool isAppAction(Uri uri) {
+    if ((uri.scheme == 'http' || uri.scheme == 'https') &&
+        !isAllowedHost(uri.host)) {
+      return false;
+    }
+    return uri.path == appActionCheckin ||
+        uri.path.startsWith('$appActionPrefix/');
   }
 
   /// 解析系统分享进来的纯文本 / 链接。

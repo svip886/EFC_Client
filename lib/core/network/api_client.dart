@@ -117,9 +117,21 @@ class ApiClient {
 
   void _throwIfError(Response<dynamic> resp) {
     final status = resp.statusCode ?? 0;
+    final data = resp.data;
+
+    // 部分接口 HTTP 200 但 body.ok=false（未登录/业务失败）
+    if (data is Map && data['ok'] == false) {
+      final message = (data['message'] is String &&
+              (data['message'] as String).isNotEmpty)
+          ? data['message'] as String
+          : '请求失败';
+      final code = data['code'] is String ? data['code'] as String : null;
+      final codeStatus = (code == 'UNAUTHORIZED') ? 401 : (status >= 400 ? status : 400);
+      throw ApiException(statusCode: codeStatus, code: code, message: message);
+    }
+
     if (status >= 200 && status < 300) return;
 
-    final data = resp.data;
     String message = 'HTTP $status';
     String? code;
     if (data is Map) {

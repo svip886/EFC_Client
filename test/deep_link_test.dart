@@ -33,6 +33,14 @@ void main() {
       expect(u?.toString(), 'https://ecfc.fans/notifications');
     });
 
+    test('ecfc quick checkin action', () {
+      final u = AppConstants.normalizeLaunchUri(
+        Uri.parse('ecfc://action/checkin'),
+      );
+      expect(u?.path, AppConstants.appActionCheckin);
+      expect(AppConstants.isAppAction(u!), isTrue);
+    });
+
     test('foreign host rejected', () {
       final u = AppConstants.normalizeLaunchUri(
         Uri.parse('https://evil.example/x'),
