@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "data": {
+    "currentBalance": 5,
+    "todayEarned": 5,
+    "dateKey": "2026-08-20",
+    "records": [
+      {
+        "id": "cmt0t508u50qnvbw2co5hyp6a",
+        "amount": 5,
+        "sourceType": "DAILY_CHECK_IN",
+        "sourceLabel": "每日挂号",
+        "description": "每日挂号",
+        "relatedId": "cmt0t505d50q7vbw29xmip8qs",
+        "createdAt": "2026-08-20T00:54:00.115Z",
+        "displayTime": "08:54"
+      }
+    ]
+  },
+  "error": null
+}

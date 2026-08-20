@@ -1,0 +1,60 @@
+{
+  "boards": [
+    {
+      "id": "cmrdfywwk0000tqb8d0w6ur1e",
+      "name": "公告区",
+      "slug": "announcements",
+      "description": "官方公告、站务通知、活动规则",
+      "coverUrl": null,
+      "sortOrder": 1,
+      "postCount": 8,
+      "followerCount": 0,
+      "isHot": false,
+      "isRecommended": false,
+      "categoryId": "cmrdh54w60000tq8ofg07usob",
+      "parentId": null
+    },
+    {
+      "id": "cmrdfyx4e0001tqb8jsndtehv",
+      "name": "日常吹水",
+      "slug": "daily-chat",
+      "description": "日常聊天、打卡闲聊、轻量互动",
+      "coverUrl": null,
+      "sortOrder": 2,
+      "postCount": 2161,
+      "followerCount": 0,
+      "isHot": false,
+      "isRecommended": false,
+      "categoryId": "cmrdh54w60000tq8ofg07usob",
+      "parentId": null
+    },
+    {
+      "id": "cmrdfyxcd0002tqb8vxb5qagh",
+      "name": "演唱会",
+      "slug": "concerts",
+      "description": "巡演、场馆、歌单、repo",
+      "coverUrl": null,
+      "sortOrder": 3,
+      "postCount": 96,
+      "followerCount": 0,
+      "isHot": false,
+      "isRecommended": false,
+      "categoryId": "cmrdh54w60000tq8ofg07usob",
+      "parentId": null
+    },
+    {
+      "id": "cmrdfyxk30003tqb86pn1fg39",
+      "name": "物料交换",
+      "slug": "merch-exchange",
+      "description": "周边、应援物料交换",
+      "coverUrl": null,
+      "sortOrder": 4,
+      "postCount": 18,
+      "followerCount": 0,
+      "isHot": false,
+      "isRecommended": false,
+      "categoryId": "cmrdh54w60000tq8ofg07usob",
+      "parentId": null
+    }
+  ]
+}

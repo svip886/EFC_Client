@@ -1,0 +1,68 @@
+﻿{
+    "profile":  {
+                    "id":  "cmt0t1x6k4univbw22cvka478",
+                    "username":  "Paranoid",
+                    "email":  "***@***.***",
+                    "phone":  "+86***********",
+                    "nickname":  "Paranoid",
+                    "uid":  11572,
+                    "avatarUrl":  "https://media.ecfc.fans/media/site/default-avatars/4f19b9b8-c4a0-422a-8c48-f838d2c30539.webp",
+                    "backgroundUrl":  null,
+                    "bio":  null,
+                    "role":  "USER",
+                    "status":  "ACTIVE",
+                    "verificationStatus":  "VERIFIED",
+                    "level":  1,
+                    "exp":  5,
+                    "points":  5,
+                    "consecutiveDays":  1,
+                    "lastLoginAt":  null,
+                    "lastActiveAt":  null,
+                    "birthMonth":  null,
+                    "birthDay":  null,
+                    "birthdaySetAt":  null,
+                    "nicknameModerationStatus":  "NORMAL",
+                    "nicknameViolationDisplay":  null,
+                    "ipRegion":  null,
+                    "profile":  {
+                                    "id":  "cmt0t1x6k4unjvbw2pzme5211",
+                                    "displayName":  "Paranoid",
+                                    "avatarUrl":  null,
+                                    "backgroundUrl":  null,
+                                    "bio":  null,
+                                    "displayNameModerationStatus":  "NORMAL",
+                                    "bioModerationStatus":  "NORMAL",
+                                    "moderationReason":  null,
+                                    "matchedBannedWords":  null,
+                                    "locationCountryCode":  null,
+                                    "locationCountry":  null,
+                                    "locationRegionCode":  null,
+                                    "locationRegion":  null,
+                                    "createdAt":  "2026-08-20T00:51:36.381Z",
+                                    "updatedAt":  "2026-08-20T00:51:36.381Z",
+                                    "userId":  "cmt0t1x6k4univbw22cvka478",
+                                    "wallVisibility":  "PUBLIC",
+                                    "location":  null
+                                },
+                    "badges":  [
+
+                               ],
+                    "_count":  {
+                                   "posts":  0,
+                                   "replies":  0,
+                                   "followers":  0,
+                                   "following":  0
+                               }
+                },
+    "usernameChange":  {
+                           "lastChangedAt":  null,
+                           "nextAllowedAt":  null,
+                           "canChange":  true
+                       },
+    "nicknameChange":  {
+                           "lastChangedAt":  null,
+                           "nextAllowedAt":  null,
+                           "canChange":  true,
+                           "cooldownDays":  30
+                       }
+}

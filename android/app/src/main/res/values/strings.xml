@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">私家E院</string>
+    <string name="shortcut_forum_short">E院广场</string>
+    <string name="shortcut_forum_long">打开 E院广场</string>
+    <string name="shortcut_checkin_short">每日挂号</string>
+    <string name="shortcut_checkin_long">打开每日挂号</string>
+    <string name="shortcut_notifications_short">消息</string>
+    <string name="shortcut_notifications_long">打开消息中心</string>
+</resources>

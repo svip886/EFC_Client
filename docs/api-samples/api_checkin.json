@@ -1,0 +1,89 @@
+{
+  "checkedToday": true,
+  "todayCheckIn": {
+    "checkDate": "2026-08-20T00:54:00.115Z",
+    "points": 5,
+    "exp": 5,
+    "mood": "looping",
+    "moodType": "PRESET",
+    "moodEmoji": null,
+    "moodText": null,
+    "message": null,
+    "streakDay": 1,
+    "createdAt": "2026-08-20T00:54:00.115Z"
+  },
+  "consecutiveDays": 1,
+  "currentStreak": 1,
+  "longestStreak": 1,
+  "totalCheckIns": 1,
+  "totalDays": 1,
+  "points": 5,
+  "exp": 5,
+  "experience": 5,
+  "level": 1,
+  "todayCount": 1763,
+  "moodStats": [
+    {
+      "_count": {
+        "mood": 71
+      },
+      "mood": "fulfilled"
+    },
+    {
+      "_count": {
+        "mood": 178
+      },
+      "mood": "blessed"
+    },
+    {
+      "_count": {
+        "mood": 93
+      },
+      "mood": "crying"
+    },
+    {
+      "_count": {
+        "mood": 242
+      },
+      "mood": "happy"
+    },
+    {
+      "_count": {
+        "mood": 181
+      },
+      "mood": "looping"
+    },
+    {
+      "_count": {
+        "mood": 332
+      },
+      "mood": "calm"
+    },
+    {
+      "_count": {
+        "mood": 205
+      },
+      "mood": "missing"
+    },
+    {
+      "_count": {
+        "mood": 258
+      },
+      "mood": "tired"
+    },
+    {
+      "_count": {
+        "mood": 111
+      },
+      "mood": "annoyed"
+    },
+    {
+      "_count": {
+        "mood": 34
+      },
+      "mood": "sick"
+    }
+  ],
+  "checkinMoodEnabled": true,
+  "todayValue": "2026-08-20"
+}

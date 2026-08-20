@@ -1,0 +1,11 @@
+[
+  {
+    "name": "eason_fans_session",
+    "domain": ".ecfc.fans",
+    "path": "/",
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax",
+    "value_len": 249
+  }
+]

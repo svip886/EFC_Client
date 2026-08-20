@@ -1,0 +1,39 @@
+name: ecfc_app
+description: "私家E院 Flutter 客户端（WebView 壳 + 原生增强）"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # 主界面：嵌入官方响应式站点
+  webview_flutter: ^4.10.0
+  webview_flutter_android: ^4.3.1
+  url_launcher: ^6.3.1
+
+  # Deep Link（冷/热启动）
+  app_links: ^6.3.3
+
+  # 预留：推送角标、快捷挂号等
+  dio: ^5.7.0
+  cookie_jar: ^4.0.8
+  dio_cookie_manager: ^3.1.1
+  path_provider: ^2.1.5
+  flutter_riverpod: ^2.6.1
+  shared_preferences: ^2.3.3
+  intl: ^0.19.0
+  cached_network_image: ^3.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

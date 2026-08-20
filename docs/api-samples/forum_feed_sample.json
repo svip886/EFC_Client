@@ -1,0 +1,248 @@
+{
+  "status": 200,
+  "ct": "application/json",
+  "body": {
+    "boards": [
+      {
+        "id": "cmrdfywwk0000tqb8d0w6ur1e",
+        "name": "公告区",
+        "slug": "announcements",
+        "description": "官方公告、站务通知、活动规则",
+        "postCount": 8,
+        "isAnnouncement": true
+      },
+      {
+        "id": "cmrdfyx4e0001tqb8jsndtehv",
+        "name": "日常吹水",
+        "slug": "daily-chat",
+        "description": "日常聊天、打卡闲聊、轻量互动",
+        "postCount": 2161,
+        "isAnnouncement": false
+      },
+      {
+        "id": "cmrdfyxcd0002tqb8vxb5qagh",
+        "name": "演唱会",
+        "slug": "concerts",
+        "description": "巡演、场馆、歌单、repo",
+        "postCount": 96,
+        "isAnnouncement": false
+      },
+      {
+        "id": "cmrdfyxk30003tqb86pn1fg39",
+        "name": "物料交换",
+        "slug": "merch-exchange",
+        "description": "周边、应援物料交换",
+        "postCount": 18,
+        "isAnnouncement": false
+      }
+    ],
+    "selectedBoard": null,
+    "posts": [
+      {
+        "id": "cmsofvaa88oekvbtxlxplgff2",
+        "title": "私家E院 | 封面征集令🎨 把“病情”画成封面，让全E院看到你的处方！",
+        "moderationStatus": "APPROVED",
+        "ipRegion": null,
+        "likeCount": 213,
+        "replyCount": 103,
+        "viewCount": 2446,
+        "isPinned": true,
+        "isFeatured": true,
+        "createdAt": "2026-08-11T09:09:17.648Z",
+        "updatedAt": "2026-08-20T02:47:13.419Z",
+        "author": {
+          "id": "cmrfb2f7n0000l404e3b26zkp",
+          "uid": 5,
+          "nickname": "妙手仁心",
+          "usernameModerationStatus": "NORMAL",
+          "nicknameModerationStatus": "NORMAL",
+          "nicknameViolationDisplay": null,
+          "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrfb2f7n0000l404e3b26zkp/ce21e39d-e3b6-4595-bef4-96fbc4e58a12.webp",
+          "level": 1,
+          "Profile": {
+            "displayName": "妙手仁心",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://ecfc-1306412725.cos.ap-guangzhou.myqcloud.com/avatars/cmrfb2f7n0000l404e3b26zkp/ce21e39d-e3b6-4595-bef4-96fbc4e58a12.webp"
+          },
+          "profile": {
+            "displayName": "妙手仁心",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrfb2f7n0000l404e3b26zkp/ce21e39d-e3b6-4595-bef4-96fbc4e58a12.webp"
+          }
+        },
+        "board": {
+          "name": "公告区",
+          "slug": "announcements"
+        },
+        "likedByMe": false
+      },
+      {
+        "id": "cmsofdpl48gobvbtx2pioqls4",
+        "title": "私家E院 | 关于线下活动相关帖子的说明",
+        "moderationStatus": "APPROVED",
+        "ipRegion": null,
+        "likeCount": 227,
+        "replyCount": 94,
+        "viewCount": 1732,
+        "isPinned": true,
+        "isFeatured": true,
+        "createdAt": "2026-08-11T08:55:37.673Z",
+        "updatedAt": "2026-08-20T02:46:57.507Z",
+        "author": {
+          "id": "cmrfbi0990000l2049lexm733",
+          "uid": 6,
+          "nickname": "E鹿樊花",
+          "usernameModerationStatus": "NORMAL",
+          "nicknameModerationStatus": "NORMAL",
+          "nicknameViolationDisplay": null,
+          "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrfbi0990000l2049lexm733/b5b19637-8155-482b-aa2c-e94ce2e48d99.webp",
+          "level": 1,
+          "Profile": {
+            "displayName": "E鹿樊花",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://ecfc-1306412725.cos.ap-guangzhou.myqcloud.com/avatars/cmrfbi0990000l2049lexm733/b5b19637-8155-482b-aa2c-e94ce2e48d99.webp"
+          },
+          "profile": {
+            "displayName": "E鹿樊花",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrfbi0990000l2049lexm733/b5b19637-8155-482b-aa2c-e94ce2e48d99.webp"
+          }
+        },
+        "board": {
+          "name": "公告区",
+          "slug": "announcements"
+        },
+        "likedByMe": false
+      },
+      {
+        "id": "cmso0t8pq3icovbn81cdgqlmz",
+        "title": "私家E院 | 对症下药·建议征集令 📋 ——采纳即“上墙”，1楼公示 + ID/UID留名致谢！",
+        "moderationStatus": "APPROVED",
+        "ipRegion": null,
+        "likeCount": 281,
+        "replyCount": 254,
+        "viewCount": 2449,
+        "isPinned": true,
+        "isFeatured": true,
+        "createdAt": "2026-08-11T02:07:48.063Z",
+        "updatedAt": "2026-08-20T02:44:22.101Z",
+        "author": {
+          "id": "cmrfb2f7n0000l404e3b26zkp",
+          "uid": 5,
+          "nickname": "妙手仁心",
+          "usernameModerationStatus": "NORMAL",
+          "nicknameModerationStatus": "NORMAL",
+          "nicknameViolationDisplay": null,
+          "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrfb2f7n0000l404e3b26zkp/ce21e39d-e3b6-4595-bef4-96fbc4e58a12.webp",
+          "level": 1,
+          "Profile": {
+            "displayName": "妙手仁心",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://ecfc-1306412725.cos.ap-guangzhou.myqcloud.com/avatars/cmrfb2f7n0000l404e3b26zkp/ce21e39d-e3b6-4595-bef4-96fbc4e58a12.webp"
+          },
+          "profile": {
+            "displayName": "妙手仁心",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrfb2f7n0000l404e3b26zkp/ce21e39d-e3b6-4595-bef4-96fbc4e58a12.webp"
+          }
+        },
+        "board": {
+          "name": "公告区",
+          "slug": "announcements"
+        },
+        "likedByMe": false
+      },
+      {
+        "id": "cmsnzeoby2w7svbn8ger1zk8f",
+        "title": "私家E院 | 互助提问·有问题来这里，大家一起交流解答",
+        "moderationStatus": "APPROVED",
+        "ipRegion": null,
+        "likeCount": 89,
+        "replyCount": 139,
+        "viewCount": 1010,
+        "isPinned": true,
+        "isFeatured": true,
+        "createdAt": "2026-08-11T01:28:28.847Z",
+        "updatedAt": "2026-08-20T01:45:25.274Z",
+        "author": {
+          "id": "cmrfakc3t0006tqg0rv1v2ftf",
+          "uid": 3,
+          "nickname": "十八张牌你能秒我",
+          "usernameModerationStatus": "NORMAL",
+          "nicknameModerationStatus": "NORMAL",
+          "nicknameViolationDisplay": null,
+          "avatarUrl": "https://media.ecfc.fans/media/site/default-avatars/a8f63bb3-477b-41a6-a224-b799dbfc136e.webp",
+          "level": 1,
+          "Profile": {
+            "displayName": "十八张牌你能秒我",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": null
+          },
+          "profile": {
+            "displayName": "十八张牌你能秒我",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": null
+          }
+        },
+        "board": {
+          "name": "公告区",
+          "slug": "announcements"
+        },
+        "likedByMe": false
+      },
+      {
+        "id": "cms20srwr01m0vbn7aspz4ue6",
+        "title": "陈奕迅生日快乐！！！",
+        "moderationStatus": "APPROVED",
+        "ipRegion": null,
+        "likeCount": 283,
+        "replyCount": 76,
+        "viewCount": 674,
+        "isPinned": true,
+        "isFeatured": true,
+        "createdAt": "2026-07-26T16:36:30.411Z",
+        "updatedAt": "2026-08-20T02:33:40.514Z",
+        "author": {
+          "id": "cmrdg98zx0000tqzczojza8iy",
+          "uid": 1,
+          "nickname": "Andkdiids",
+          "usernameModerationStatus": "NORMAL",
+          "nicknameModerationStatus": "NORMAL",
+          "nicknameViolationDisplay": null,
+          "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrdg98zx0000tqzczojza8iy/3a37663d-a014-436c-a489-23e3034474ad/source.webp",
+          "level": 1,
+          "Profile": {
+            "displayName": "Andkdiids",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrdg98zx0000tqzczojza8iy/3a37663d-a014-436c-a489-23e3034474ad/source.webp"
+          },
+          "profile": {
+            "displayName": "Andkdiids",
+            "displayNameModerationStatus": "NORMAL",
+            "avatarUrl": "https://media.ecfc.fans/media/avatars/cmrdg98zx0000tqzczojza8iy/3a37663d-a014-436c-a489-23e3034474ad/source.webp"
+          }
+        },
+        "board": {
+          "name": "日常吹水",
+          "slug": "daily-chat"
+        },
+        "likedByMe": false
+      }
+    ],
+    "total": 2291,
+    "totalPages": 459,
+    "page": 1,
+    "pagination": {
+      "page": 1,
+      "pageSize": 5,
+      "total": 2291,
+      "totalPages": 459,
+      "hasMore": true
+    },
+    "permissions": {
+      "canCreatePost": true,
+      "canCreateAnnouncement": false
+    }
+  },
+  "textLen": 5847
+}
