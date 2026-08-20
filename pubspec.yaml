@@ -20,7 +20,10 @@ dependencies:
   # Deep Link（冷/热启动）
   app_links: ^6.3.3
 
-  # 预留：推送角标、快捷挂号等
+  # 桌面角标（未读）
+  app_badge_plus: ^1.2.3
+
+  # 预留：推送、快捷挂号等（Dio + Cookie 与 WebView 会话同步）
   dio: ^5.7.0
   cookie_jar: ^4.0.8
   dio_cookie_manager: ^3.1.1

@@ -8,6 +8,8 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 import '../core/constants.dart';
 import '../core/deep_link_bus.dart';
+import '../core/session_cookie_sync.dart';
+import '../services/unread_badge_service.dart';
 
 /// 私家E院主壳：全屏 WebView 承载官方响应式站点。
 ///
@@ -57,6 +59,11 @@ class _WebShellPageState extends State<WebShellPage> {
               _progress = 100;
             });
             unawaited(_injectOverscrollCss());
+            // 登录/跳转后把会话灌进 Dio，并刷新角标
+            unawaited(() async {
+              await SessionCookieSync.syncFromWebView();
+              await UnreadBadgeService.instance.refresh();
+            }());
           },
           onWebResourceError: (err) {
             if (err.isForMainFrame == true && mounted) {

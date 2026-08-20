@@ -61,6 +61,19 @@ class ApiClient {
     await _cookieJar.deleteAll();
   }
 
+  /// 用 WebView 同步来的 Cookie 覆盖写入持久化 jar。
+  Future<void> importCookies(List<Cookie> cookies) async {
+    if (cookies.isEmpty) return;
+    final hosts = <Uri>{
+      Uri.parse(AppConstants.baseUrl),
+      Uri.parse('https://ecfc.fans/'),
+      Uri.parse('https://www.ecfc.fans/'),
+    };
+    for (final uri in hosts) {
+      await _cookieJar.saveFromResponse(uri, cookies);
+    }
+  }
+
   Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? query,
@@ -68,6 +81,21 @@ class ApiClient {
 
   Future<Response<dynamic>> post(String path, {Object? data}) =>
       _guard(() => _dio.post(path, data: data));
+
+  /// 不抛业务异常的 GET（用于未读轮询等后台任务；网络失败仍抛）。
+  Future<Response<dynamic>> getSoft(
+    String path, {
+    Map<String, dynamic>? query,
+  }) async {
+    try {
+      return await _dio.get(path, queryParameters: query);
+    } on DioException catch (e) {
+      if (e.response != null) return e.response!;
+      throw ApiException(message: '网络连接失败：${e.message}');
+    } on SocketException catch (e) {
+      throw ApiException(message: '网络连接失败：$e');
+    }
+  }
 
   Future<Response<dynamic>> _guard(
     Future<Response<dynamic>> Function() run,
