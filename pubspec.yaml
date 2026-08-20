@@ -1,7 +1,7 @@
 name: ecfc_app
 description: "私家E院 Flutter 客户端（WebView 壳 + 原生增强）"
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: ^3.13.1
