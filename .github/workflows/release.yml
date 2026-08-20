@@ -1,11 +1,7 @@
 name: Release
 
-# 目标：能打包出多平台产物并挂到 GitHub Release（不要求商店上架/签名分发）。
-# - Android: release APK（1 个）
-# - Windows: zip（内含 exe + 依赖；运行需 WebView2）
-# - macOS: zip（.app）
-# - iOS: 无签名 ipa（flutter build ipa --no-codesign），仅作构建验证/自签原料
-
+# 鐩爣锛氳兘鎵撳寘鍑哄骞冲彴浜х墿骞舵寕鍒?GitHub Release锛堜笉瑕佹眰鍟嗗簵涓婃灦/绛惧悕鍒嗗彂锛夈€?# - Android: release APK锛? 涓級
+# - Windows: zip锛堝唴鍚?exe + 渚濊禆锛涜繍琛岄渶 WebView2锛?# - macOS: zip锛?app锛?# - iOS: 鏃犵鍚?zip锛圥ayload/Runner.app锛夛紝浠呮瀯寤洪獙璇?
 on:
   push:
     tags:
@@ -100,7 +96,6 @@ jobs:
           VER="${{ needs.version.outputs.version }}"
           APK="ecfc-${VER}-android.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "dist/${APK}"
-          echo "apk=${APK}" >> "$GITHUB_ENV"
           ls -la dist
       - uses: actions/upload-artifact@v4
         with:
@@ -127,29 +122,11 @@ jobs:
           grep -E '^version:' pubspec.yaml
       - run: flutter config --enable-windows-desktop
       - run: flutter pub get
-      # 新 MSVC 对 experimental/coroutine 直接 error；webview_windows 0.4 仍依赖它
-      - name: Silence experimental coroutine deprecation for plugins
-        shell: pwsh
+      - name: Build Windows release
+        shell: cmd
         run: |
-          $ErrorActionPreference = 'Stop'
-          $cmake = 'windows/flutter/generated_plugins.cmake'
-          $marker = '_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS'
-          $content = Get-Content $cmake -Raw
-          if ($content -notmatch [regex]::Escape($marker)) {
-            $append = @"
-
-# Auto-added for webview_windows + new MSVC
-foreach(plugin `${FLUTTER_PLUGIN_LIST})
-  target_compile_definitions(`${plugin}_plugin PRIVATE $marker)
-endforeach()
-"@
-            Add-Content -Path $cmake -Value $append -Encoding utf8
-          }
-          Get-Content $cmake
-      - run: flutter build windows --release
-        env:
-          # 额外兜底：传给 cl.exe
-          CL: /D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
+          set CL=/D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
+          flutter build windows --release
       - name: Zip bundle
         shell: pwsh
         run: |
@@ -176,7 +153,6 @@ endforeach()
     name: macOS
     needs: version
     runs-on: macos-latest
-    # 允许失败时仍发布其它平台产物
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -192,7 +168,7 @@ endforeach()
       - run: flutter config --enable-macos-desktop
       - run: flutter pub get
       - run: flutter build macos --release
-      - name: Zip .app
+      - name: Zip app
         run: |
           set -euo pipefail
           VER="${{ needs.version.outputs.version }}"
@@ -224,7 +200,6 @@ endforeach()
           sed -i '' -E "s/^version: .*/version: ${{ needs.version.outputs.full }}/" pubspec.yaml
           grep -E '^version:' pubspec.yaml
       - run: flutter pub get
-      # 无开发者证书：只求能编过；产物为 unsigned ipa / 构建目录打包
       - name: Build iOS no-codesign
         run: |
           set -euo pipefail
@@ -236,7 +211,6 @@ endforeach()
           mkdir -p dist
           APP=$(find build/ios -name 'Runner.app' -type d | head -n1)
           echo "Found: $APP"
-          # 做成 Payload 结构，方便有证书时再签
           STAGE=$(mktemp -d)
           mkdir -p "$STAGE/Payload"
           cp -R "$APP" "$STAGE/Payload/"
@@ -252,7 +226,6 @@ endforeach()
   publish:
     name: Publish GitHub Release
     needs: [version, android, windows, macos, ios]
-    # 至少 Android 成功即可发版；其它平台 best-effort
     if: ${{ always() && needs.version.result == 'success' && needs.android.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
@@ -261,18 +234,12 @@ endforeach()
         with:
           path: artifacts
       - name: Collect + version.json
-        id: pack
         run: |
           set -euo pipefail
-          VER="${{ needs.version.outputs.version }}"
-          BUILD="${{ needs.version.outputs.build }}"
-          TAG="${{ needs.version.outputs.tag }}"
-          REPO="${{ github.repository }}"
           mkdir -p dist
           find artifacts -type f -print -exec cp -v {} dist/ \;
           ls -la dist
-
-          python3 - <<'PY'
+          python3 <<'PY'
           import json, glob
           from pathlib import Path
 
