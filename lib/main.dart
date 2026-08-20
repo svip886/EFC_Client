@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'core/constants.dart';
 import 'core/deep_link_bus.dart';
+import 'core/share_intent.dart';
 import 'pages/web_shell_page.dart';
 
 Future<void> main() async {
@@ -21,6 +22,7 @@ Future<void> main() async {
     ),
   );
   await DeepLinkBus.start();
+  await ShareIntent.start();
   runApp(const EcfcApp());
 }
 

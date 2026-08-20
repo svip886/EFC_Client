@@ -36,6 +36,7 @@ C:\private\project\app\ecfc\
 - **Deep Link**：`https://ecfc.fans/*`、`ecfc://forum|checkin|notifications`（`app_links` + Manifest intent-filter；完整 App Links 需站点部署 `assetlinks.json`）
 - **App Shortcuts**：长按图标 → E院广场 / 每日挂号 / 消息
 - **品牌**：`applicationId=fans.ecfc.app`，蓝色启动闪屏，自适应图标前景
+- **外部分享接收**：系统「分享」到私家E院（`text/plain`）；正文含 `ecfc.fans` / `ecfc://` 则打开对应页，否则进 `/search?q=`
 
 ## 明确不做（体验冲突）
 
@@ -50,7 +51,7 @@ C:\private\project\app\ecfc\
 - 推送通知、角标（需后端设备注册）
 - Web Cookie 与 Dio CookieJar 同步后的轻量原生页 / 小组件
 - 正式 App Links（`https://ecfc.fans/.well-known/assetlinks.json`）
-- 外部分享接收（系统分享链接进 WebView）
+- 从 App 内「分享出去」（Web 已有分享时可不做）
 
 ## 文案与品牌
 

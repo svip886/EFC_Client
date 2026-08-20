@@ -54,6 +54,12 @@
                 <action android:name="fans.ecfc.app.SHORTCUT"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
+            <!-- 系统分享：接收 text/plain（链接或关键字 → WebView） -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
 
             <meta-data
                 android:name="android.app.shortcuts"

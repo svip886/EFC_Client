@@ -80,4 +80,38 @@ class AppConstants {
 
     return null;
   }
+
+  /// 解析系统分享进来的纯文本 / 链接。
+  ///
+  /// - 文中含 `ecfc.fans` / `ecfc://` 链接 → 打开对应页
+  /// - 否则 → `/search?q=...`（截断过长文本）
+  static Uri? resolveSharedContent(String? raw) {
+    if (raw == null) return null;
+    final text = raw.trim();
+    if (text.isEmpty) return null;
+
+    // 先尝试整段就是 URI
+    final asUri = Uri.tryParse(text);
+    if (asUri != null && asUri.hasScheme) {
+      final n = normalizeLaunchUri(asUri);
+      if (n != null) return n;
+    }
+
+    // 从正文里抠 http(s) / ecfc 链接（分享时常夹带标题）
+    final urlRe = RegExp(
+      r'(?:https?://|ecfc://)[^\s<>"{}|\\^`\[\]）】]+',
+      caseSensitive: false,
+    );
+    for (final m in urlRe.allMatches(text)) {
+      var candidate = m.group(0)!;
+      // 去掉中文标点尾巴
+      candidate = candidate.replaceAll(RegExp(r'[，。；、！？,.!?;:]+$'), '');
+      final uri = Uri.tryParse(candidate);
+      final n = normalizeLaunchUri(uri);
+      if (n != null) return n;
+    }
+
+    final q = text.length > 200 ? text.substring(0, 200) : text;
+    return Uri.https('ecfc.fans', '/search', {'q': q});
+  }
 }

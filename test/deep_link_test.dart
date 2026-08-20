@@ -40,4 +40,43 @@ void main() {
       expect(u, isNull);
     });
   });
+
+  group('AppConstants.resolveSharedContent', () {
+    test('plain ecfc url', () {
+      final u = AppConstants.resolveSharedContent(
+        'https://ecfc.fans/posts/abc123',
+      );
+      expect(u?.path, '/posts/abc123');
+    });
+
+    test('url embedded in title text', () {
+      final u = AppConstants.resolveSharedContent(
+        '看看这篇 https://ecfc.fans/forum?board=daily-chat 有意思',
+      );
+      expect(u?.path, '/forum');
+      expect(u?.queryParameters['board'], 'daily-chat');
+    });
+
+    test('ecfc scheme in share body', () {
+      final u = AppConstants.resolveSharedContent('打开 ecfc://checkin');
+      expect(u?.toString(), 'https://ecfc.fans/checkin');
+    });
+
+    test('plain text goes to search', () {
+      final u = AppConstants.resolveSharedContent('陈奕迅 演唱会');
+      expect(u?.path, '/search');
+      expect(u?.queryParameters['q'], '陈奕迅 演唱会');
+    });
+
+    test('foreign url alone falls to search', () {
+      final u = AppConstants.resolveSharedContent('https://evil.example/x');
+      expect(u?.path, '/search');
+      expect(u?.queryParameters['q'], 'https://evil.example/x');
+    });
+
+    test('empty rejected', () {
+      expect(AppConstants.resolveSharedContent('   '), isNull);
+      expect(AppConstants.resolveSharedContent(null), isNull);
+    });
+  });
 }
