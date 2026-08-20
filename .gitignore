@@ -59,3 +59,7 @@ Thumbs.db
 .env
 .env.*
 !docs/
+
+# Local screenshots / scratch
+img/
+
