@@ -50,6 +50,11 @@
 
 （工作流里已留注释位，接入时取消注释即可。）
 
+## 本机 Gradle 代理
+
+不要把 `systemProp.*.proxy*` 写进仓库的 `android/gradle.properties`（会弄挂 GitHub Actions）。  
+本机请写到用户级：`%USERPROFILE%\.gradle\gradle.properties`。
+
 ## 多平台路线
 
 | 平台 | 状态 | 备注 |
