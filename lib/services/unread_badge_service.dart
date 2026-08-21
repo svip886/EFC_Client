@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../core/network/api_client.dart';
 import '../core/session_cookie_sync.dart';
+import 'realtime_notification_service.dart';
 
 /// 轮询未读摘要并更新桌面角标。
 ///
@@ -69,7 +70,8 @@ class UnreadBadgeService with WidgetsBindingObserver {
           total = int.tryParse(t) ?? 0;
         }
       }
-      await _setBadge(total < 0 ? 0 : total);
+      await RealtimeNotificationService.instance.ingestTotal(total);
+      _lastTotal = total < 0 ? 0 : total;
     } catch (e) {
       debugPrint('UnreadBadgeService: $e');
     } finally {

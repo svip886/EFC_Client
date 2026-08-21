@@ -50,6 +50,9 @@ class ApiClient {
 
   Dio get dio => _dio;
 
+  /// 读取当前 CookieJar 对某 URI 会携带的 Cookie（给 WebSocket 握手用）。
+  Future<List<Cookie>> loadCookiesFor(Uri uri) => _cookieJar.loadForRequest(uri);
+
   /// 是否存有 ECFC 的会话 Cookie（近似判断，真正是否有效以请求结果为准）。
   Future<bool> hasSessionCookie() async {
     final uri = Uri.parse(AppConstants.baseUrl);

@@ -7,6 +7,7 @@ import 'core/share_intent.dart';
 import 'pages/web_shell_page.dart';
 import 'pages/windows_web_shell_page.dart';
 import 'services/unread_badge_service.dart';
+import 'services/realtime_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,7 @@ Future<void> main() async {
   await DeepLinkBus.start();
   await ShareIntent.start();
   await UnreadBadgeService.instance.start();
+  await RealtimeNotificationService.instance.start();
   runApp(const EcfcApp());
 }
 

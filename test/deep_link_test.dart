@@ -26,6 +26,12 @@ void main() {
       expect(u?.toString(), 'https://ecfc.fans/forum');
     });
 
+    test('notification payload opens message center', () {
+      // 本地通知点击 payload：host 即路径段，不能带 open 前缀（站点会 404）
+      final u = AppConstants.normalizeLaunchUri(Uri.parse('ecfc://notifications'));
+      expect(u?.toString(), 'https://ecfc.fans/notifications');
+    });
+
     test('ecfc scheme with path only', () {
       final u = AppConstants.normalizeLaunchUri(
         Uri.parse('ecfc:///notifications'),

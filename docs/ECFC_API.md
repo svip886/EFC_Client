@@ -292,6 +292,20 @@
 
 `unread-summary` 字段：`notifications, system, replies, likes, wall, feedbackReplies, feedback, friendRequests, directMessages, messages, total`。
 
+#### 实时通道：`wss://ecfc.fans/ws`（已抓包确认）
+
+官方 Web 登录后由 layout 建立长连，带会话 Cookie。消息为 JSON：
+
+```json
+{ "type": "unread-summary", "summary": { ...同上字段, "total": N }, "changed": [], "updatedAt": "ISO8601" }
+{ "type": "notification-changed", ... }
+```
+
+- `unread-summary`：直接带最新计数，客户端可直接更新角标。
+- `notification-changed`：不带计数，需回拉一次 `GET /api/notifications/unread-summary`。
+- 客户端实现见 `lib/services/realtime_notification_service.dart`：连不上时退回轮询（90s + 前台即时刷）。
+- 站点无 Service Worker / VAPID，**无离线推送基础设施**，第三方客户端只能前台长连 + 轮询 + 本地通知。
+
 ### 5.11 好友 / 私信（二期）
 
 - `GET /api/friends/list?limit=20`
@@ -392,7 +406,7 @@ Android 调试环境对齐：`C:\private\project\stock\StockGrandCouncil\docs\an
 - [ ] 帖内回复分页的确定 API（或确认仅首包 N 条）
 - [ ] 收藏/取消收藏精确路径与响应
 - [ ] 热门页 `/trending` 对应 API
-- [ ] WebSocket `/ws` 是否用于通知
+- [x] WebSocket `/ws` 是否用于通知（已确认：见 5.10）
 - [ ] 注册、找回密码流程（若 App 需要）
 
 ## 10. 本地样本索引

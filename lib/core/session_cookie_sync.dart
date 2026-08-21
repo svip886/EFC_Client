@@ -72,4 +72,27 @@ class SessionCookieSync {
     if (d.isEmpty) return '.ecfc.fans';
     return d.startsWith('.') ? d : '.$d';
   }
+
+  /// 当前会话 Cookie 值（已同步过才返回非空）。
+  static String? get sessionValue {
+    final v = _lastSessionValue;
+    return (v != null && v.isNotEmpty) ? v : null;
+  }
+
+  /// 给原生 HTTP/WebSocket 请求用的 Cookie 头。
+  static Future<String?> cookieHeader() async {
+    try {
+      final client = await ApiClient.ensureInitialized();
+      final cookies =
+          (await client.loadCookiesFor(Uri.parse(AppConstants.baseUrl)));
+      if (cookies.isEmpty) return null;
+      return cookies.map((c) => '${c.name}=${c.value}').join('; ');
+    } catch (_) {
+      final v = _lastSessionValue;
+      if (v == null || v.isEmpty) return null;
+      return '$sessionCookieName=$v';
+    }
+  }
+
+  static const String sessionCookieName = AppConstants.sessionCookieName;
 }
