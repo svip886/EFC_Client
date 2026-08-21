@@ -10,6 +10,29 @@
 | Owner / Repo | `svip886` / `EFC_Client`（`lib/core/constants.dart`） |
 | 版本清单 | Release 资产 `version.json`；仓库备份 `app/version.json` |
 
+## Android 固定签名（2026-08 起）
+
+Android release 用**固定 keystore** 签名，保证每次 CI 产物签名一致、可直接覆盖升级：
+
+| 项 | 值 |
+|---|---|
+| keystore | `android/app/ecfc-release.jks`（**不入库**，gitignore） |
+| 别名 | `ecfc` |
+| 本地配置 | `android/key.properties`（**不入库**，gitignore） |
+| 证书 SHA-256 | `b2f2e5ac1bfee2661b408d3352148772f275df981f1c215843accd24577449b1` |
+
+CI 端（`release.yml` Android 任务）从 Secrets 解码生成：
+
+- `ANDROID_KEYSTORE_BASE64`：keystore 文件的 base64
+- `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_PASSWORD`：密码
+- `ANDROID_KEY_ALIAS`：`ecfc`
+
+本地无 `key.properties` 时自动回退 debug 签名（开发不影响）。
+
+**备份提醒**：`ecfc-release.jks` 与密码丢失 = 无法再覆盖升级（只能换包名重发）。请把 keystore 和密码另存到安全位置。
+
+**注意**：历史上 CI 曾用 runner 随机 debug 签名，旧版本用户升级到固定签名版需**卸载重装一次**（WebView 登录态会丢，需重新登录）。
+
 ## 发版（能打包即可）
 
 1. 改 `pubspec.yaml`：`version: x.y.z+build`（build 单调递增）
@@ -22,7 +45,7 @@
 
 | 产物 | Runner | 说明 |
 |---|---|---|
-| `ecfc-*-android.apk` | ubuntu | 可侧载（当前 debug 签名配置见 `android/app/build.gradle.kts`） |
+| `ecfc-*-android.apk` | ubuntu | 固定 keystore 签名（见上文），可覆盖升级 |
 | `ecfc-*-windows-x64.zip` | windows | 解压运行；需 [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) |
 | `ecfc-*-macos.zip` | macos | 内含 `.app`；未公证，本机可能需右键打开 |
 | `ecfc-*-ios-unsigned.zip` | macos | `Payload/Runner.app`，**无签名**；仅构建验证，真机需自行签名 |

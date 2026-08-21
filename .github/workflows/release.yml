@@ -1,7 +1,7 @@
 name: Release
 
-# 鐩爣锛氳兘鎵撳寘鍑哄骞冲彴浜х墿骞舵寕鍒?GitHub Release锛堜笉瑕佹眰鍟嗗簵涓婃灦/绛惧悕鍒嗗彂锛夈€?# - Android: release APK锛? 涓級
-# - Windows: zip锛堝唴鍚?exe + 渚濊禆锛涜繍琛岄渶 WebView2锛?# - macOS: zip锛?app锛?# - iOS: 鏃犵鍚?zip锛圥ayload/Runner.app锛夛紝浠呮瀯寤洪獙璇?
+# 目标：多平台构建并挂 GitHub Release。
+# Android 用固定 keystore 签名（Secrets 注入，签名稳定可覆盖升级）；Windows zip（需 WebView2）；macOS zip；iOS 无签名 zip。
 on:
   push:
     tags:
@@ -85,6 +85,26 @@ jobs:
           set -euo pipefail
           sed -i -E "s/^version: .*/version: ${{ needs.version.outputs.full }}/" pubspec.yaml
           grep -E '^version:' pubspec.yaml
+      - name: Decode Android signing key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$ANDROID_KEYSTORE_BASE64" ]]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 not set, falling back to debug signing"
+            exit 0
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/ecfc-release.jks
+          {
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+            echo "keyPassword=$ANDROID_KEY_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "storeFile=ecfc-release.jks"
+          } > android/key.properties
+          echo "signing key ready: $(ls -la android/app/ecfc-release.jks)"
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos
       - run: flutter test
