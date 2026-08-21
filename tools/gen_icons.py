@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "assets" / "app_icon_source.webp"
+SRC = ROOT / "assets" / "app_icon_source.png"
 BRAND = (47, 125, 225, 255)
 
 def make_square(im, size, pad=BRAND):
@@ -54,9 +54,10 @@ def main():
         txt = re.sub(r'<color name="ic_launcher_background">.*?</color>', '<color name="ic_launcher_background">#2F7DE1</color>', txt)
     colors.write_text(txt, encoding="utf-8")
     sizes=[16,32,48,64,128,256]
-    imgs=[make_square(img,s) for s in sizes]
+    # ICO 必须从大基图缩放生成全部条目；之前 append_images 写法只存出 16x16
+    big = make_square(img, 256)
     ico = ROOT/"windows"/"runner"/"resources"/"app_icon.ico"
-    imgs[0].save(ico, format="ICO", sizes=[(s,s) for s in sizes], append_images=imgs[1:])
+    big.save(ico, format="ICO", sizes=[(s,s) for s in sizes])
     print(ico)
     scale={"1x":1,"2x":2,"3x":3}
     def fill(appiconset: Path):
