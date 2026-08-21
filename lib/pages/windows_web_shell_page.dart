@@ -95,8 +95,8 @@ class _WindowsWebShellPageState extends State<WindowsWebShellPage> {
         if (uri == null) return;
         if (AppConstants.isAppAction(uri)) {
           unawaited(_handleAppAction(uri));
-          // 尽量停在当前页：回退或重开 community
-          unawaited(_controller.loadUrl(AppConstants.homeUri.toString()));
+          // 不再硬 loadUrl(homeUri)：与即将 push 的设置页抢占 WebView2
+          // 渲染线程会导致 Windows 崩溃。改由设置页返回后统一 resume。
           return;
         }
         if (_shouldOpenExternally(uri)) {
@@ -344,9 +344,33 @@ class _WindowsWebShellPageState extends State<WindowsWebShellPage> {
 
   Future<void> _openAppSettings() async {
     if (!mounted) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(builder: (_) => const AppSettingsPage()),
-    );
+    // WebView2 与同进程的 Material 页面叠加时，swapping surface 上去
+    // 会闪退。先 suspend 让出渲染，返回后 resume。
+    var suspended = false;
+    try {
+      await _controller.suspend();
+      suspended = true;
+    } catch (e) {
+      debugPrint('webview suspend: $e');
+    }
+    try {
+      if (!mounted) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(builder: (_) => const AppSettingsPage()),
+      );
+    } finally {
+      if (suspended) {
+        try {
+          await _controller.resume();
+        } catch (e) {
+          debugPrint('webview resume: $e');
+          // resume 失败时尝试重新加载首页兜底
+          if (mounted) {
+            unawaited(_controller.loadUrl(AppConstants.homeUri.toString()));
+          }
+        }
+      }
+    }
   }
 
   Future<void> _runQuickCheckin() async {
